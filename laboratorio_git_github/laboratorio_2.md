@@ -170,7 +170,7 @@ Usaremos **eShopOnWeb**
 
     ```bash
     git add src/Web/Program.cs
-    git commit -m "My commit"
+    git commit -m "feat(web): My commit"
     ```
 
 6.  Sube los cambios al repositorio remoto:
@@ -222,7 +222,7 @@ Usaremos **eShopOnWeb**
 6.  Realiza el commit de los cambios staged:
 
     ```bash
-    git commit -m "Added comments"
+    git commit -m "chore(web): Added comments"
     ```
 
 7.  Sube los cambios:
@@ -379,7 +379,7 @@ Usaremos **eShopOnWeb**
     ```bash
     echo "// Testing main branch policy" >> src/Web/Program.cs
     git add src/Web/Program.cs
-    git commit -m "Testing direct commit to main"
+    git commit -m "feat(web): Testing direct commit to main"
     git push origin main
     ```
 
@@ -414,7 +414,7 @@ Usaremos **eShopOnWeb**
 
     ```bash
     git add src/Web/Program.cs
-    git commit -m "Testing my first PR - Closes #1"
+    git commit -m "feat(web): test my first PR - Closes #1"
     git push origin dev
     ```
 
@@ -540,8 +540,11 @@ git switch -c dev            # alternativa moderna para crear rama
 # Staging/commit
 git add archivo.txt          # agregar archivo específico
 git add .                    # agregar todos los cambios
-git commit -m "mensaje"      # commit con mensaje
-git commit -am "mensaje"     # add + commit para archivos tracked
+# Commits con Conventional Commits
+git commit -m "feat(web): descripción breve del cambio"
+git commit -m "fix(api): corrige error en endpoint"
+git commit -m "chore: actualiza dependencias"
+git commit -am "refactor(core): mejora estructura de datos"
 
 # Sincronizar
 git pull                     # traer cambios del remoto
@@ -636,5 +639,5 @@ git push origin --delete dev # eliminar rama remota
 - **Conflictos de merge**: resuelve manualmente y luego:
   ```bash
   git add archivo-resuelto.txt
-  git commit -m "Resolve merge conflict"
+  git commit -m "fix: Resolve merge conflict"
   ```
