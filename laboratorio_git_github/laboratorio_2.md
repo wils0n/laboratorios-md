@@ -4,7 +4,7 @@
 **Nivel:** Principiante--Intermedio\
 **Contexto:** Realizarás clonación, commits, exploración de
 historial, trabajo con ramas, **pull requests**, **branch protection
-rules** y **tags**. Usaremos **VS Code** y **Git**.
+rules** y **tags**. Usaremos comandos de **Git** en terminal.
 
 ---
 
@@ -15,7 +15,7 @@ Al finalizar, podrás:
 - Clonar un repositorio existente desde GitHub.
 - Guardar trabajo local con **commits** y **staging**.
 - Revisar historial y comparar cambios.
-- Trabajar con ramas desde VS Code.
+- Trabajar con ramas desde terminal.
 - Crear **Pull Requests (PRs)** con políticas de protección (revisiones requeridas).
 - Aplicar **tags** y crear un **release**.
 
@@ -25,7 +25,8 @@ Al finalizar, podrás:
 
 - Navegador compatible (Chrome/Firefox/Safari/Microsoft Edge).
 - Cuenta de **GitHub** (gratuita u organización).
-- **Git ** instalado.
+- **Git** instalado.
+- Terminal (zsh, bash, PowerShell, etc.).
 
 ---
 
@@ -42,12 +43,10 @@ Usaremos **eShopOnWeb**
 
 ## Ejercicio 0: Configurar prerrequisitos
 
-### Tarea 1: Configurar Git y VS Code
+### Tarea 1: Configurar Git
 
-1.  Abre **VS Code**.
-2.  Abre **Terminal** → **New Terminal**.
-3.  (Opcional) Cambia el shell a PowerShell/Bash según prefieras.
-4.  Configura tu helper de credenciales y tu identidad:
+1.  Abre una **terminal**.
+2.  Configura tu helper de credenciales y tu identidad:
 
     - **Windows** (Git Credential Manager):
 
@@ -66,6 +65,12 @@ Usaremos **eShopOnWeb**
       # Linux con GCM (si lo usas):
       # git config --global credential.helper manager-core
       ```
+
+3.  Verifica la configuración:
+
+    ```bash
+    git config --list --show-origin
+    ```
 
 ### Tarea 2: Crear repositorio en **GitHub** por importación
 
@@ -93,22 +98,37 @@ Usaremos **eShopOnWeb**
 
 ## Ejercicio 1: Clonar un repositorio existente
 
-### Tarea 1: Clonar con VS Code
+### Tarea 1: Clonar con Git
 
 1.  En GitHub, abre tu repo `owner/eshoponweb` y haz clic en **Code** →
     pestaña **HTTPS** → **Copy** (URL de clonación).
-2.  En VS Code, abre **Command Palette** (`Ctrl+Shift+P` o `F1`) y
-    ejecuta **Git: Clone**.
 
-![vscode_command](images/vscode-command.png)
+2.  En la terminal, navega a la carpeta donde quieres clonar el repositorio:
 
-3.  Pega la URL y elige una carpeta local (por ejemplo `C:\Git` en
-    Windows o `~/Git` en macOS/Linux).
-4.  Cuando termine, VS Code te ofrecerá **Open**; acepta para abrir la
-    carpeta del repo.
+    ```bash
+    # Crear directorio Git si no existe
+    mkdir -p ~/Git
+    cd ~/Git
+    ```
 
-> Si el editor muestra advertencias de carga/SDK, ignóralas: **no**
-> necesitas compilar para este lab.
+3.  Clona el repositorio:
+
+    ```bash
+    git clone https://github.com/TU_USUARIO/eshoponweb.git
+    ```
+
+4.  Navega al directorio del repositorio:
+
+    ```bash
+    cd eshoponweb
+    ```
+
+5.  Verifica el estado del repositorio:
+
+    ```bash
+    git status
+    git branch -a
+    ```
 
 ---
 
@@ -122,7 +142,14 @@ Usaremos **eShopOnWeb**
 
 ### Tarea 1: Primer commit
 
-1.  En el Explorador de VS Code, abre `src/Web/Program.cs`.
+1.  Abre el archivo `src/Web/Program.cs` con tu editor favorito:
+
+    ```bash
+    # Puedes usar nano, vim, code, etc.
+    nano src/Web/Program.cs
+    # o si tienes VS Code instalado:
+    code src/Web/Program.cs
+    ```
 
 2.  En la **primera línea**, agrega un comentario:
 
@@ -130,20 +157,27 @@ Usaremos **eShopOnWeb**
     // My first change
     ```
 
-3.  Guarda (`Ctrl+S`).
+3.  Guarda el archivo y cierra el editor.
 
-4.  Abre la vista **Source Control** (icono de Git). Verás el archivo
-    modificado.
+4.  Verifica los cambios:
 
-![first-commit](images/first-commit.png)
+    ```bash
+    git status
+    git diff src/Web/Program.cs
+    ```
 
-5.  En el cuadro de mensaje, escribe: `My commit` y presiona
-    `Ctrl+Enter` para **commit**.
+5.  Añade el archivo al staging area y realiza el commit:
 
-    - Si pide auto-stage, elige **Always**.
+    ```bash
+    git add src/Web/Program.cs
+    git commit -m "My commit"
+    ```
 
-6.  Sincroniza (icono ↕ en la barra inferior) para hacer **push** a
-    `origin/main`.
+6.  Sube los cambios al repositorio remoto:
+
+    ```bash
+    git push origin main
+    ```
 
 ### Tarea 2: Revisar commits en GitHub
 
@@ -159,24 +193,51 @@ Usaremos **eShopOnWeb**
     // My second change
     ```
 
-2.  Abre `src/Web/Constants.cs` y agrega:
+2.  Edita `src/Web/Constants.cs` y agrega:
 
     ```csharp
     // My third change
     ```
 
-3.  En **Source Control**, **stage** solo `Program.cs` (clic en el ícono
-    `+`).
+3.  Verifica los cambios en ambos archivos:
 
-4.  Escribe mensaje: `Added comments` → **Commit** de **Staged**.
+    ```bash
+    git status
+    git diff src/Web/Program.cs
+    git diff src/Web/Constants.cs
+    ```
 
-![staged-changes.png](images/staged-changes.png)
+4.  Añade solo `Program.cs` al staging area:
 
-5.  Haz **push** para sincronizar. Observa que `Constants.cs` sigue sin
-    commitear (cambio pendiente).
+    ```bash
+    git add src/Web/Program.cs
+    ```
 
-> Sugerencia: usa la vista **diff** de VS Code para comparar lado a
-> lado.
+5.  Verifica que solo `Program.cs` está en staging:
+
+    ```bash
+    git status
+    ```
+
+6.  Realiza el commit de los cambios staged:
+
+    ```bash
+    git commit -m "Added comments"
+    ```
+
+7.  Sube los cambios:
+
+    ```bash
+    git push origin main
+    ```
+
+    Observa que `Constants.cs` sigue sin commitear (cambio pendiente).
+
+8.  Puedes ver las diferencias usando:
+
+    ```bash
+    git diff src/Web/Constants.cs
+    ```
 
 ---
 
@@ -184,12 +245,46 @@ Usaremos **eShopOnWeb**
 
 ### Tarea 1: Comparar archivos y explorar historial
 
-1.  En VS Code, selecciona `Constants.cs` en **Source Control** para
-    abrir el **diff**.
+1.  Verifica los cambios pendientes en `Constants.cs`:
 
-![file-comparison](images/file-comparison.png)
+    ```bash
+    git diff src/Web/Constants.cs
+    ```
 
-2.  En GitHub, abre **Commits** y entra a un commit para ver **Browse
+2.  Explora el historial de commits:
+
+    ```bash
+    # Ver log con formato compacto
+    git log --oneline
+
+    # Ver log con más detalles
+    git log --graph --pretty=format:'%h -%d %s (%cr) <%an>' --abbrev-commit
+
+    # Ver cambios en un commit específico
+    git show <commit-hash>
+    ```
+
+3.  Para ver el estado del repositorio en un commit específico:
+
+    ```bash
+    # Ver archivos en un commit específico
+    git ls-tree -r <commit-hash>
+
+    # Ver el contenido de un archivo en un commit específico
+    git show <commit-hash>:src/Web/Program.cs
+    ```
+
+4.  Compara diferencias entre commits:
+
+    ```bash
+    # Diferencias entre los últimos 2 commits
+    git diff HEAD~1 HEAD
+
+    # Diferencias entre commits específicos
+    git diff <commit-hash1> <commit-hash2>
+    ```
+
+5.  En GitHub, abre **Commits** y entra a un commit para ver **Browse
     files** (estado del repo en ese punto) o **Changes** para ver el
     patch.
 
@@ -202,18 +297,55 @@ Usaremos **eShopOnWeb**
 
 ### Tarea 1: Crear una nueva rama local
 
-1.  En VS Code (barra inferior), haz clic en `main` → **Create new
-    branch...**.
+1.  Verifica en qué rama estás actualmente:
 
-![create-branch.png](images/create-branch.png)
+    ```bash
+    git branch
+    git status
+    ```
 
-2.  Base: **main**.\
-3.  Nombre: `dev` y presiona **Enter** (cambia automáticamente a `dev`).
+2.  Crea y cambia a una nueva rama llamada `dev`:
+
+    ```bash
+    git checkout -b dev
+    ```
+
+    O alternativamente (Git 2.23+):
+
+    ```bash
+    git switch -c dev
+    ```
+
+3.  Verifica que estás en la rama `dev`:
+
+    ```bash
+    git branch
+    ```
 
 ### Tarea 2: Publicar y gestionar ramas
 
-1.  En VS Code, haz **Publish Branch** para subir `dev` a GitHub.
-2.  En GitHub, ve a **Branches** (pestaña del repo) y verifica que
+1.  Publica la rama `dev` en GitHub:
+
+    ```bash
+    git push -u origin dev
+    ```
+
+    El flag `-u` establece `origin/dev` como rama upstream para futuros push/pull.
+
+2.  Verifica las ramas locales y remotas:
+
+    ```bash
+    # Ramas locales
+    git branch
+
+    # Ramas remotas
+    git branch -r
+
+    # Todas las ramas
+    git branch -a
+    ```
+
+3.  En GitHub, ve a **Branches** (pestaña del repo) y verifica que
     exista `dev`.
 
 ### Tarea 3: Definir **Branch Protection Rules** (políticas sobre `main`)
@@ -236,34 +368,53 @@ Usaremos **eShopOnWeb**
 
 ### Tarea 4: Probar la política de `main` (bloqueo de commits directos)
 
-1.  En GitHub, con la rama **main** seleccionada en la vista de
-    archivos, edita `src/Web/Program.cs` en el editor web.
+1.  Cambia a la rama main:
 
-2.  Agrega:
-
-    ```csharp
-    // Testing main branch policy
+    ```bash
+    git checkout main
     ```
 
-3.  Intenta **Commit changes** directamente a `main`.\
+2.  Intenta editar un archivo directamente en `main`:
 
-4.  Observa el **bloqueo** y cancela.
+    ```bash
+    echo "// Testing main branch policy" >> src/Web/Program.cs
+    git add src/Web/Program.cs
+    git commit -m "Testing direct commit to main"
+    git push origin main
+    ```
+
+3.  Si la política está correctamente configurada, el push será **rechazado**.
+
+4.  Deshaz los cambios locales:
+
+    ```bash
+    git reset --hard HEAD~1
+    ```
 
 ### Tarea 5: Crear una **Issue**, hacer cambio en `dev` y abrir PR
 
 1.  En GitHub, pestaña **Issues** → **New issue**.
     - **Title:** `Testing my first PR`\
     - **Submit new issue** (anota el número, p. ej. `#1`).
-2.  Cambia a rama **dev** en el repo (GitHub o local).
+2.  Cambia a rama **dev**:
 
-    - En GitHub (editor web) o en VS Code, edita `src/Web/Program.cs`
-      y agrega:
+    ```bash
+    git checkout dev
+    ```
 
-      ```csharp
-      // Testing my first PR
-      ```
+    Edita `src/Web/Program.cs` y agrega:
 
-    - Realiza **Commit** en la rama `dev` (si es local, haz **push**).
+    ```csharp
+    // Testing my first PR
+    ```
+
+    Realiza **Commit** en la rama `dev`:
+
+    ```bash
+    git add src/Web/Program.cs
+    git commit -m "Testing my first PR - Closes #1"
+    git push origin dev
+    ```
 
 3.  GitHub mostrará un banner "Compare & pull request". Clic en **Create
     pull request**.
@@ -274,9 +425,23 @@ Usaremos **eShopOnWeb**
     si deseas.
 7.  En la pestaña **Conversation**, **Approve** (si eres revisor) y
     luego **Merge**.
+
     - **Merge method:** _Create a merge commit_ (equivalente a "Merge
       no fast-forward").
     - Activa "**Delete branch**" tras el merge.
+
+8.  Actualiza tu repositorio local tras el merge:
+
+    ```bash
+    git checkout main
+    git pull origin main
+    ```
+
+    También puedes eliminar la rama local `dev`:
+
+    ```bash
+    git branch -d dev
+    ```
 
 > Al hacer merge, la Issue `#1` se cierra automáticamente por el
 > `Closes #1`.
@@ -287,12 +452,44 @@ Usaremos **eShopOnWeb**
 
 ### Tarea 1: Crear tag `v1.1.0-beta`
 
-1.  En GitHub, ve a **Releases** → **Draft a new release**.
-2.  En **Choose a tag**, escribe `v1.1.0-beta` y selecciona **Create new
-    tag** apuntando a `main`.
-3.  **Release title:** `Beta release v1.1.0`.
-4.  (Opcional) Marca como **pre-release**.
-5.  Clic en **Publish release**.
+1.  Asegúrate de estar en la rama `main` y con los últimos cambios:
+
+    ```bash
+    git checkout main
+    git pull origin main
+    ```
+
+2.  Crea el tag localmente:
+
+    ```bash
+    git tag -a v1.1.0-beta -m "Beta release v1.1.0"
+    ```
+
+3.  Sube el tag al repositorio remoto:
+
+    ```bash
+    git push origin v1.1.0-beta
+    ```
+
+4.  En GitHub, ve a **Releases** → **Draft a new release**.
+
+5.  En **Choose a tag**, selecciona `v1.1.0-beta` (que ya existe).
+
+6.  **Release title:** `Beta release v1.1.0`.
+
+7.  (Opcional) Marca como **pre-release**.
+
+8.  Clic en **Publish release**.
+
+    Alternativamente, puedes crear el tag directamente desde GitHub:
+
+    ```bash
+    # Ver todos los tags
+    git tag
+
+    # Ver información del tag
+    git show v1.1.0-beta
+    ```
 
 > Esto crea un **tag** y un **release** asociado al último commit de
 > `main`.
@@ -314,23 +511,50 @@ approvals**.\
 ```bash
 # Ver configuración
 git config --list --show-origin
+git config --global user.name "Tu Nombre"
+git config --global user.email "tu-email@example.com"
+
+# Clonar repositorio
+git clone https://github.com/usuario/repo.git
+cd repo
+
+# Verificar estado
+git status
+git branch
+git branch -a                # ver todas las ramas (locales y remotas)
 
 # Cambiar/crear rama
-git checkout -b dev        # crear y moverse
-git checkout main          # volver a main
-
-# Sincronizar
-git pull                   # traer cambios
-git push -u origin dev     # publicar rama por 1ª vez
+git checkout -b dev          # crear y moverse
+git checkout main            # volver a main
+git switch -c dev            # alternativa moderna para crear rama
 
 # Staging/commit
-git status
-git add path/al/archivo
-git commit -m "mensaje"
+git add archivo.txt          # agregar archivo específico
+git add .                    # agregar todos los cambios
+git commit -m "mensaje"      # commit con mensaje
+git commit -am "mensaje"     # add + commit para archivos tracked
+
+# Sincronizar
+git pull                     # traer cambios del remoto
+git push                     # subir cambios
+git push -u origin dev       # publicar rama por 1ª vez
+
+# Historial y diferencias
+git log --oneline            # historial compacto
+git log --graph --pretty=format:'%h -%d %s (%cr) <%an>' --abbrev-commit
+git diff                     # diferencias no staged
+git diff --staged            # diferencias staged
+git show <commit-hash>       # ver commit específico
 
 # Tags
-git tag v1.1.0-beta        # crea tag local
-git push origin v1.1.0-beta
+git tag                      # listar tags
+git tag -a v1.1.0-beta -m "mensaje"  # crear tag anotado
+git push origin v1.1.0-beta # subir tag
+git show v1.1.0-beta        # ver información del tag
+
+# Gestión de ramas
+git branch -d dev            # eliminar rama local
+git push origin --delete dev # eliminar rama remota
 ```
 
 ---
@@ -338,10 +562,10 @@ git push origin v1.1.0-beta
 ## Criterios de éxito (Checklist)
 
 - [ ] Repo importado a **GitHub**.
-- [ ] Clonación local exitosa en **VS Code**.
+- [ ] Clonación local exitosa usando **Git**.
 - [ ] Al menos **2 commits** en `main` (uno con **staging
       selectivo**).
-- [ ] Historial revisado en GitHub.
+- [ ] Historial revisado con comandos Git y en GitHub.
 - [ ] Rama `dev` creada, publicada y PR creado.
 - [ ] **Branch protection** en `main` con **1 aprobación** requerida.
 - [ ] PR aprobado, merge realizado y rama `dev` eliminada.
@@ -351,8 +575,22 @@ git push origin v1.1.0-beta
 
 ## Extensiones y extras (opcional)
 
-- **GitHub Pull Requests and Issues** (extensión VS Code) para
-  gestionar PRs/Issues desde el editor.
+- **GitHub CLI** (`gh`): Herramienta de línea de comandos para gestionar PRs/Issues:
+
+  ```bash
+  # Instalar GitHub CLI (macOS)
+  brew install gh
+
+  # Autenticarse
+  gh auth login
+
+  # Crear PR desde línea de comandos
+  gh pr create --title "Mi PR" --body "Closes #1"
+
+  # Ver PRs
+  gh pr list
+  ```
+
 - **Codeowners**: añade `CODEOWNERS` para requerir aprobaciones de
   equipos/usuarios específicos.
 - **Plantilla de PR**: agrega `.github/pull_request_template.md` con
@@ -366,11 +604,28 @@ git push origin v1.1.0-beta
 
 - **403 al hacer push**: revisa que el remoto sea
   `https://github.com/<owner>/<repo>.git` y que el helper de
-  credenciales esté guardando el token correcto.
+  credenciales esté guardando el token correcto. Puedes verificar con:
+  ```bash
+  git remote -v
+  git config --list | grep credential
+  ```
 - **No aparece "Compare & pull request"**: crea el PR manualmente:
   **Pull requests** → **New pull request** (base: `main`, compare:
-  `dev`).
+  `dev`) o usa GitHub CLI:
+  ```bash
+  gh pr create --base main --head dev
+  ```
 - **No puedo commitear en `main`**: es lo esperado si la protección
   está activa; usa una rama y PR.
 - **El tag no aparece**: si lo creaste localmente, recuerda
   `git push origin <tag>` o usa la UI de **Releases**.
+- **Error "divergent branches"**: sincroniza antes de hacer push:
+  ```bash
+  git pull origin main
+  git push origin main
+  ```
+- **Conflictos de merge**: resuelve manualmente y luego:
+  ```bash
+  git add archivo-resuelto.txt
+  git commit -m "Resolve merge conflict"
+  ```
