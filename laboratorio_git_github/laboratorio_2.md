@@ -354,8 +354,8 @@ Usaremos **eShopOnWeb**
 2.  Configura la regla para `Branch name pattern`: `main`.
 3.  Activa:
     - ✅ **Require a pull request before merging**
-    - ✅ **Require approvals** → **1** (como estás solo, luego te
-      autoapruebas)
+    - ✅ **Do not allow bypassing the above settings** (Esto evita que los administradores (incluyéndote a ti) puedan saltarse las protecciones.)
+    - (Opcional) **Require approvals** → **1**
     - (Opcional) **Dismiss stale pull request approvals**
     - (Opcional) **Require linear history**
     - (Opcional) **Require status checks to pass** (si deseas, agrega
@@ -384,6 +384,8 @@ Usaremos **eShopOnWeb**
     ```
 
 3.  Si la política está correctamente configurada, el push será **rechazado**.
+
+![reject_main](images/reject_main.png)
 
 4.  Deshaz los cambios locales:
 
@@ -418,6 +420,9 @@ Usaremos **eShopOnWeb**
 
 3.  GitHub mostrará un banner "Compare & pull request". Clic en **Create
     pull request**.
+
+![PR create](images/PR-create.png)
+
 4.  En la **descripción del PR**, escribe `Closes #1` para **vincular**
     la Issue.
 5.  Crea el PR contra `main`.
@@ -471,7 +476,9 @@ Usaremos **eShopOnWeb**
     git push origin v1.1.0-beta
     ```
 
-4.  En GitHub, ve a **Releases** → **Draft a new release**.
+4.  En GitHub, ve a **Releases** → **Create a new release**.
+
+![release create](images/release-create.png)
 
 5.  En **Choose a tag**, selecciona `v1.1.0-beta` (que ya existe).
 
@@ -481,7 +488,9 @@ Usaremos **eShopOnWeb**
 
 8.  Clic en **Publish release**.
 
-    Alternativamente, puedes crear el tag directamente desde GitHub:
+![release-created.png](images/release-created.png)
+
+> Alternativamente, puedes crear el tag directamente desde GitHub:
 
     ```bash
     # Ver todos los tags
