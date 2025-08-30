@@ -142,8 +142,8 @@ LaunchDarkly nos proporciona todas estas capacidades profesionales.
 
 3. Obtén las claves SDK:
    - Ve a **Account Settings** → **Projects** → **TBD Feature Flags Lab**
-   - Copia el **SDK Key** del entorno **Production**
-   - Copia el **Client-side ID** del entorno **Production**
+   - Copia el **SDK Key** del entorno **Test**
+   - Copia el **Client-side ID** del entorno **Test**
 
 ### Tarea 2: Configurar servidor Node.js con feature flags
 
@@ -160,6 +160,13 @@ LaunchDarkly nos proporciona todas estas capacidades profesionales.
    npm install
    ```
 
+> Optionalmente ejecutar los comandos para instalar las librerías:
+
+```bash
+npm i @launchdarkly/node-server-sdk
+npm i dotenv
+```
+
 3. Configura las variables de entorno:
 
    ```bash
@@ -171,8 +178,8 @@ LaunchDarkly nos proporciona todas estas capacidades profesionales.
 
    ```bash
    # Backend SDK Key
-   LD_SDK_KEY=sdk-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-   LD_EVENT_KEY=tbd-lab
+   LD_SDK_KEY='sdk-7383abc'
+   LD_EVENT_KEY='68abc'
    ```
 
 5. Inicia el servidor:
@@ -299,56 +306,6 @@ LaunchDarkly nos proporciona todas estas capacidades profesionales.
    git push origin main
    ```
 
-### Tarea 3: Iteración con TBD - Mejorar el servidor
-
-1. Agrega más funcionalidad con el mismo flag:
-
-   ```javascript
-   // Agregar después de la ruta existente
-   app.get("/menu", (req, res) => {
-     client.variation(
-       "feat-new-menu",
-       context,
-       false,
-       function (err, showFeature) {
-         if (showFeature) {
-           res.json({
-             menu: [
-               { id: 1, name: "🍔 Premium Burger", price: 15.99 },
-               { id: 2, name: "🍕 Artisan Pizza", price: 18.5 },
-               { id: 3, name: "🥗 Gourmet Salad", price: 12.99 },
-             ],
-             features: ["new-recipes", "nutritional-info", "customization"],
-           });
-         } else {
-           res.json({
-             menu: [
-               { id: 1, name: "Burger", price: 10.99 },
-               { id: 2, name: "Pizza", price: 14.5 },
-             ],
-           });
-         }
-       }
-     );
-   });
-   ```
-
-2. Commit inmediato (TBD):
-
-   ```bash
-   git add server.mjs
-   git commit -m "feat(menu): add /menu endpoint with feature flag
-
-   - New endpoint returns enhanced menu when flag is ON
-   - Maintains backward compatibility when flag is OFF
-   - Safe to deploy - hidden behind existing flag"
-   git push origin main
-   ```
-
-3. Prueba la nueva ruta:
-   - Visita [http://localhost:3000/menu](http://localhost:3000/menu)
-   - Cambia el flag en LaunchDarkly y ve las diferencias
-
 ---
 
 ## Ejercicio 3: Configurar Galaxy Marketplace con feature flags
@@ -382,8 +339,6 @@ LaunchDarkly nos proporciona todas estas capacidades profesionales.
    LD_SDK_KEY=sdk-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
    LD_EVENT_KEY=tbd-lab
 
-   # Frontend Client Key (para Next.js)
-   NEXT_PUBLIC_LD_CLIENT_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
    ```
 
 5. Inicia la aplicación:
@@ -399,6 +354,8 @@ LaunchDarkly nos proporciona todas estas capacidades profesionales.
 1. Revisa el código en `pages/marketplace.tsx` para entender la implementación:
 
    ```tsx
+   // archivo completo en: https://gist.github.com/wils0n/773d9eaa40a0597bba22061644dab795
+
    import { useFlags, useLDClient } from "launchdarkly-react-client-sdk";
 
    export default function Marketplace() {
@@ -432,21 +389,6 @@ LaunchDarkly nos proporciona todas estas capacidades profesionales.
        );
      }
    }
-   ```
-
-2. Observa el tracking de eventos para experimentos:
-
-   ```tsx
-   const addToCart = (item: any) => {
-     // Tracking cuando se agrega item al carrito
-     LDClient?.track("item-added", LDClient.getContext(), 1);
-     setCart([...cart, item]);
-   };
-
-   const storeAccessed = () => {
-     // Tracking cuando se accede a una tienda
-     LDClient?.track("item-accessed", LDClient.getContext(), 1);
-   };
    ```
 
 ### Tarea 3: Probar la integración completa
