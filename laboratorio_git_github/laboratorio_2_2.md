@@ -178,7 +178,7 @@ LaunchDarkly nos proporciona todas estas capacidades profesionales.
 5. Inicia el servidor:
 
    ```bash
-   npm start
+   node server.mjs
    ```
 
    Accede a [http://localhost:3000](http://localhost:3000) para verificar que funciona.
