@@ -1,6 +1,32 @@
-# Hoja de trucos de Bash (Bash Cheat Sheet)
+# Hoja de trucos de Bash (Bash Cheat Sheet) y vim
 
-Una hoja de referencia para comandos de **bash**.
+Una hoja de referencia para comandos de **bash** y vim.
+
+## Comandos vim
+
+```bash
+vim foo.txt               # Abrir archivo foo.txt en Vim
+i                         # Modo insertar (editar texto)
+Esc                       # Salir del modo insertar
+:w                        # Guardar cambios
+:q                        # Salir de Vim
+:wq                       # Guardar y salir
+:q!                       # Salir sin guardar
+:x                        # Guardar y salir (igual que :wq)
+:! comando                # Ejecutar comando de shell (ej: :!ls)
+u                         # Deshacer último cambio
+Ctrl+r                    # Rehacer cambio
+dd                        # Eliminar línea actual
+yy                        # Copiar línea actual
+p                         # Pegar después de la línea actual
+gg                        # Ir al inicio del archivo
+G                         # Ir al final del archivo
+/texto                    # Buscar 'texto' hacia adelante
+n                         # Siguiente resultado de búsqueda
+N                         # Resultado anterior de búsqueda
+:set number               # Mostrar números de línea
+:sav nombre_archivo.txt.  # Guardar cambios en archivo
+```
 
 ## Navegación de directorios
 
@@ -20,8 +46,6 @@ cd foo                    # Ir al subdirectorio foo
 cd                        # Ir al directorio home
 cd ~                      # Ir al directorio home
 cd -                      # Volver al último directorio
-pushd foo                 # Ir a foo y apilar el directorio previo
-popd                      # Volver al directorio apilado por `pushd`
 ```
 
 ## Crear directorios
