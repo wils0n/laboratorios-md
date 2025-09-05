@@ -543,7 +543,7 @@ vim setup_galaxy.sh
 # Script de automatización para Galaxy Marketplace
 
 # Configuración
-REPO_URL="https://github.com/wils0n/Galaxy-Marketplace-Example-App.git"
+REPO_URL="https://github.com/launchdarkly-labs/Galaxy-Marketplace-Example-App.git"
 PROJECT_NAME="Galaxy-Marketplace-Example-App"
 ENV_SOURCE="../environments/.env"
 
