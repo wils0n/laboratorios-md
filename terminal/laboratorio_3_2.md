@@ -103,7 +103,7 @@ alias gcl='git clone'
 
 ## Ejercicio 6: Automatiza todo con un script Bash
 
-Crea un archivo llamado `deploy_django.sh` con el siguiente contenido:
+1. Crea un archivo llamado `deploy_django.sh` con el siguiente contenido:
 
 ```bash
 #!/bin/bash
@@ -132,6 +132,18 @@ pip install -r requirements.txt
 python manage.py migrate
 python manage.py runserver
 ```
+
+2. Brindando permisos de ejecución
+
+   ```bash
+   chmod +x deploy_django.sh
+   ```
+
+3. Ejecutando script
+
+   ```bash
+   ./deploy_django.sh
+   ```
 
 ### PowerShell script to deploy Django app on Windows
 
