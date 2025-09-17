@@ -1,4 +1,3 @@
-https://awspolicygen.s3.amazonaws.com/policygen.html
 
 # Guía: Subida de imagen a S3 y configuración de acceso público con Policy Generator
 
