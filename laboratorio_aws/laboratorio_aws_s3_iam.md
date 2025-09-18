@@ -31,9 +31,10 @@
 ## 3. Agregar la política al bucket
 
 1. Ve a la consola de S3 y entra a la configuración de tu bucket.
-2. Haz clic en "Permisos" > "Política de bucket" (Bucket Policy).
-3. Pega el JSON de la política generada.
-4. Guarda los cambios.
+2. Habilitar acceso público
+3. Haz clic en "Permisos" > "Política de bucket" (Bucket Policy).
+4. Pega el JSON de la política generada.
+5. Guarda los cambios.
 
 ---
 
