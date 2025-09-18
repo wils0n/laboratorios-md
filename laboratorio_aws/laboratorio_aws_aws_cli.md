@@ -8,7 +8,7 @@
 
 ## Objetivos de aprendizaje
 
-- Validar la instalación y autenticación de AWS CLI
+- Validar la instalación y autenticación de AWS CLI (https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 - Listar buckets S3 desde Bash
 - Subir archivos a un bucket S3 usando scripts
 - Automatizar tareas básicas de AWS con Bash
