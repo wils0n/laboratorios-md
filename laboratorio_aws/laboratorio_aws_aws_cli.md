@@ -44,6 +44,14 @@ Antes de ejecutar cualquier script, asegúrate de tener una clave de acceso conf
    - AWS Secret Access Key
    - Región por defecto (ejemplo: us-east-1)
    - Formato de salida (ejemplo: json)
+  
+> Nota: Validar que su archivo .aws/config tenga el contenido similar a
+```bash
+<path to>/.aws/config:
+[default]
+region = us-east-1
+output = json
+```
 
 ---
 
