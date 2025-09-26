@@ -36,10 +36,10 @@
 2. **Capturas/Archivos obligatorios en el repositorio:**
    - `app.py` y `requirements.txt` creados.  
    - `Dockerfile` implementado.  
-   - Capatura de image Docker construida (salida de `docker images`).  
+   - Captura de image Docker construida (salida de `docker images`).  
    - Captura de Contenedor ejecutándose localmente en puerto `8080` (captura del servidor corriendo en el navegador y captura del contenedor corriendo desde Docker Desktop).
-   - Captura de la imagen Docker publicada en **Docker Hub** (captura del repositorio en hub.docker.com).  
-   - Captura de la imagen publicada en **AWS ECR** (captura del repositorio en la consola AWS).  
+   - Captura de la imagen Docker publicada en **Docker Hub** (captura del repositorio en hub.docker.com que se note la url).  
+   - Captura de la imagen publicada en **AWS ECR** (captura del repositorio en la consola AWS con el URI visible).  
 
 ---
 
