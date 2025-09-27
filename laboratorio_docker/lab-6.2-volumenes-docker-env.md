@@ -45,6 +45,7 @@ flask-docker-app/
 │  ├─ run-dev.sh
 │  └─ run-prod.sh
 └─ lab6.2/   <-- evidencias/capturas de este laboratorio
+└─ lab6.1/   <-- evidencias/capturas de laboratorio 6.1
 ```
 
 > **Importante:** Nunca subas el `.env` real al repo. Solo versiona `.env.example`.
@@ -299,57 +300,7 @@ docker run -d \
   --restart unless-stopped \
   flask-docker-app:1.1
 ```
-### Validación: ¿El archivo `.env` está en la imagen o solo en el volumen?
 
-**1. Verifica que la imagen NO contiene el archivo `.env` ni secretos:**
-
-```bash
-docker run --rm -it flask-docker-app:1.1 /bin/sh
-# Dentro del contenedor, ejecuta:
-ls /app/.env
-# Resultado esperado: "No such file or directory"
-exit
-```
-
-**2. Verifica que el archivo `.env` SÍ aparece en el contenedor con el volumen montado:**
-
-```bash
-docker exec -it flask-dev cat /app/.env
-# Resultado esperado: ves el contenido de tu archivo .env.dev
-```
-
-Esto demuestra que los secretos y la configuración viven fuera de la imagen y solo se inyectan al contenedor en tiempo de ejecución usando el volumen.
-
-### ¿Cómo ingresar a un contenedor en ejecución y explorar archivos?
-
-Para abrir una terminal interactiva dentro de un contenedor ya corriendo (por ejemplo, para inspeccionar archivos o ejecutar comandos):
-
-```bash
-docker exec -it flask-dev /bin/sh
-# Ahora puedes usar comandos como ls, cat, etc.
-ls /app
-cat /app/.env
-exit  # Para salir de la sesión interactiva
-```
-
-También puedes ejecutar un solo comando directamente (sin entrar en modo interactivo):
-
-```bash
-docker exec -it flask-dev cat /app/.env
-```
-
-Esto te permite validar el contenido del archivo `.env` dentro del contenedor y comprobar que está siendo montado correctamente desde tu máquina local.
-
-### ¿Qué hace el parámetro `-v`?
-
-El parámetro `-v "$(pwd)/env/.env.dev:/app/.env:ro"` monta el archivo `.env.dev` de tu máquina local dentro del contenedor, en la ruta `/app/.env`.
-
-- **`-v`**: Indica que vas a montar un volumen (archivo o carpeta).
-- **`$(pwd)/env/.env.dev`**: Ruta absoluta al archivo en tu máquina.
-- **`:/app/.env`**: Ruta donde aparecerá el archivo dentro del contenedor.
-- **`:ro`**: Solo lectura, el contenedor puede leer pero no modificar el archivo.
-
-Esto permite que la app Flask lea las variables de entorno desde ese archivo usando `python-dotenv`, sin que el archivo se copie ni se hornee en la imagen. Si editas `.env.dev` en tu máquina, solo necesitas reiniciar el contenedor para que Flask use los nuevos valores.
 
 ### ¿Cómo reiniciar el contenedor para aplicar cambios en `.env`?
 
@@ -499,8 +450,58 @@ En `docker-compose.yml` puedes apuntar a la imagen del registro remoto en lugar 
 
 ---
 
+## 7) Validación: ¿El archivo `.env` está en la imagen, contenedor o solo en el volumen?
 
-## 7) Solución de problemas comunes
+**1. Verifica que la imagen NO contiene el archivo `.env` ni secretos:**
+
+```bash
+docker run -it flask-docker-app:1.1 /bin/sh
+# Dentro del contenedor, ejecuta:
+ls /app/.env
+# Resultado esperado: "No such file or directory"
+exit
+```
+
+**2. Verifica que el archivo `.env` está en el contenedor creado hace un momento:**
+
+```bash
+docker exec -it flask-dev /bin/sh
+# Dentro del contenedor, ejecuta:
+ls /app/.env
+/app/.env # Si existe porque a momento que se creó el contenedor se montó un volumen
+exit
+```
+
+**3. Verifica que el archivo `.env` SÍ aparece en el contenedor con el volumen montado:**
+
+```bash
+docker exec -it flask-dev cat /app/.env
+# Resultado esperado: ves el contenido de tu archivo .env.dev
+```
+
+Esto demuestra que los secretos y la configuración viven fuera de la imagen y solo se inyectan al contenedor en tiempo de ejecución usando el volumen.
+
+
+### ¿Qué hace el parámetro `-v`?
+
+El parámetro `-v "$(pwd)/env/.env.dev:/app/.env:ro"` monta el archivo `.env.dev` de tu máquina local dentro del contenedor, en la ruta `/app/.env`.
+
+
+### ¿Por qué existe `.env` en el contenedor si solo tienes `.env.dev`?
+
+El archivo `.env` aparece en el contenedor porque el parámetro `-v` de Docker está montando tu archivo local `.env.dev` en la ruta `/app/.env` dentro del contenedor. Es decir, aunque en tu máquina solo existe `.env.dev`, Docker lo "renombra" al montarlo en el contenedor, y ahí aparece como `.env`.
+
+Esto NO significa que el archivo `.env` esté dentro de la imagen. Si inspeccionas la imagen con `docker run --rm -it flask-docker-app:1.1 /bin/sh` y ejecutas `ls /app/.env`, verás que no existe. Solo aparece cuando el volumen está montado.
+
+**Resumen:**
+- El archivo `.env` vive fuera de la imagen, en tu máquina local.
+- Docker lo monta y lo renombra dentro del contenedor según la ruta que especifiques.
+- La imagen nunca contiene secretos ni archivos de configuración sensibles.
+
+Esto permite que la app Flask lea las variables de entorno desde ese archivo usando `python-dotenv`, sin que el archivo se copie ni se hornee en la imagen. Si editas `.env.dev` en tu máquina, solo necesitas reiniciar el contenedor para que Flask use los nuevos valores.
+
+
+## 8) Solución de problemas comunes
 
 - **La app no ve mis variables**  
   Asegúrate de:
