@@ -1,4 +1,4 @@
-# Laboratorio 5.2 — Volúmenes Docker para `.env` (continuación de la guía Flask + Docker Hub + ECR)
+# Laboratorio 6.2 — Volúmenes Docker para `.env` (continuación de la guía Flask + Docker Hub + ECR)
 
 **Duración estimada:** 60–90 min  
 **Nivel:** Intermedio  
@@ -8,7 +8,7 @@
 
 ## Objetivos de aprendizaje
 
-- Comprender los tipos de volúmenes en Docker y saber cuándo usar un bind mount. Caso de uso (archivos de configuración en aplicación web)
+- Comprender los tipos de volúmenes en Docker y saber cuándo usar un bind mount (para archivos de configuración como .env) 
 - Montar un archivo `.env` en tiempo de ejecución usando volúmenes.
 - Cargar variables de entorno en Flask con `python-dotenv` (sin incluir secretos en la imagen).
 - Ejecutar la app con:
@@ -22,27 +22,6 @@
 
 - Haber completado la guía **"Contenedores Docker con Flask - Dockerfile, Docker Hub y ECR"** y contar con el proyecto `flask-docker-app`.
 - Docker (sin necesidad de Docker Compose).
-- Python 3.x.
-- (Opcional) Cuenta en Docker Hub y acceso a AWS ECR para publicar la nueva versión.
-
----
-
-## Objetivos de aprendizaje
-
-- Entender la diferencia entre *bind mounts* y *named volumes* (y cuándo usar cada uno).
-- Montar un archivo `.env` en tiempo de ejecución usando volúmenes.
-- Cargar variables de entorno en Flask con `python-dotenv` (sin incluir secretos en la imagen).
-- Ejecutar la app con:
-  - `docker run` + `-v` (bind mount del `.env`).
-  - Scripts bash para gestionar entornos `dev`/`prod`.
-- Comprobar que el contenedor **no** contiene secretos en la imagen y que el `.env` vive fuera, en el host.
-
----
-
-## Requisitos
-
-- Haber completado la guía **“Contenedores Docker con Flask - Dockerfile, Docker Hub y ECR”** y contar con el proyecto `flask-docker-app`.
-- Docker (sin Docker Compose).
 - Python 3.x.
 - (Opcional) Cuenta en Docker Hub y acceso a AWS ECR para publicar la nueva versión.
 
@@ -206,6 +185,7 @@ FROM python:3.11-slim
 WORKDIR /app
 
 COPY requirements.txt .
+
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app.py .
@@ -339,6 +319,26 @@ docker exec -it flask-dev cat /app/.env
 ```
 
 Esto demuestra que los secretos y la configuración viven fuera de la imagen y solo se inyectan al contenedor en tiempo de ejecución usando el volumen.
+
+### ¿Cómo ingresar a un contenedor en ejecución y explorar archivos?
+
+Para abrir una terminal interactiva dentro de un contenedor ya corriendo (por ejemplo, para inspeccionar archivos o ejecutar comandos):
+
+```bash
+docker exec -it flask-dev /bin/sh
+# Ahora puedes usar comandos como ls, cat, etc.
+ls /app
+cat /app/.env
+exit  # Para salir de la sesión interactiva
+```
+
+También puedes ejecutar un solo comando directamente (sin entrar en modo interactivo):
+
+```bash
+docker exec -it flask-dev cat /app/.env
+```
+
+Esto te permite validar el contenido del archivo `.env` dentro del contenedor y comprobar que está siendo montado correctamente desde tu máquina local.
 
 ### ¿Qué hace el parámetro `-v`?
 
@@ -542,7 +542,7 @@ En `docker-compose.yml` puedes apuntar a la imagen del registro remoto en lugar 
 ## Entregables
 
 - **URL de repositorio** (GitHub/GitLab).
-- Carpeta **`lab5.2/`** con:
+- Carpeta **`lab6.2/`** con:
   1. `env/.env.example`, `.env.dev`, `.env.prod`
   2. Scripts en `scripts/` (`run-dev.sh`, `run-prod.sh`, `manage.sh`)
   3. `app.py` y `requirements.txt` actualizados
