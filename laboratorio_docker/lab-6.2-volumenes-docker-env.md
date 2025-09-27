@@ -456,13 +456,21 @@ En `docker-compose.yml` puedes apuntar a la imagen del registro remoto en lugar 
 
 ```bash
 docker run -it flask-docker-app:1.1 /bin/sh
+
+Este comando crea un contenedor nuevo y temporal (lo puedes ver en docker desktop que se crea un contenedor con un nombre random) a partir de la imagen  `flask-docker-app:1.1`, iniciando una terminal interactiva (`/bin/sh`).
+
+- No monta volúmenes ni expone puertos.
+- El contenedor solo tiene los archivos que están en la imagen (por ejemplo, `app.py`, `requirements.txt`).
+- Al salir con `exit`, el contenedor se elimina si usas `--rm`.
+
+Sirve para inspeccionar el contenido real de la imagen y validar que no contiene secretos ni archivos `.env`.
 # Dentro del contenedor, ejecuta:
 ls /app/.env
 # Resultado esperado: "No such file or directory"
 exit
 ```
 
-**2. Verifica que el archivo `.env` está en el contenedor creado hace un momento:**
+**2. Verifica que el archivo `.env` está en el contenedor flask-dev creado hace un momento (donde se montó un volumen en tiempo de ejecución):**
 
 ```bash
 docker exec -it flask-dev /bin/sh
