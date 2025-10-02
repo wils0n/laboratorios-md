@@ -417,7 +417,7 @@ api_key = Path("/app/secure/api_key.txt").read_text().strip()
 ---
 
 ## 6. Configuraciones en Compose
-Archivo `config-dev.yaml`:
+Crear el archivo `config-dev.yml` dentro de la carpeta flask-docker-compose:
 ```yaml
 env: dev
 ```
@@ -442,7 +442,7 @@ services:
         target: /api_key
     environment:
       - APP_VERSION=0.1.0
-    volumes:
+    volumes: # 1ra forma
       - ./flask-docker-compose/config-dev.yml:/config-dev.yml
     
 
@@ -559,6 +559,7 @@ services:
       - private
 
 secrets:
+  # existing code
   pg_password:
     file: ./pg_password.txt
 
@@ -575,10 +576,15 @@ pg_password.txt:
 ```yaml
 devops123
 ```
+
+.env.dev.txt:
+```yaml
+DB_PASSWORD=devops123
+```
 Creamos los contenedores
 
 ```bash
-docker compose up -d
+docker compose up --build -d
 docker ps
 ```
 
@@ -590,7 +596,7 @@ Si ya tienes los contenedores corriendo (`docker ps`), ejecuta:
 docker exec -it sesion7-postgres-1 psql -h localhost -p 5432 -U myuser -d mydb
 ```
 
-> Ajusta el nombre del contenedor (`199-postgres-1`) si el tuyo es diferente.  
+> Ajusta el nombre del contenedor (`sesion7-postgres-1`) si el tuyo es diferente.  
 > Alternativa con Compose: `docker compose exec postgres psql -U myuser -d mydb`
 
 ---
