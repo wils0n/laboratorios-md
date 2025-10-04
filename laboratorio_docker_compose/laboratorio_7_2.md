@@ -202,25 +202,33 @@ Deberías ver la respuesta de Flask pasando a través de Nginx.
 
 ### Diagramas: 
 
+```mermaid
 flowchart LR
-    Client["🌐 Cliente externo (curl / navegador)"] -->|http://localhost:8080| Nginx
+  Client["🌐 Cliente externo (curl / navegador)"] -->|http://localhost:8080| Nginx
 
-    subgraph DockerHost["Docker Host"]
-        direction TB
+  subgraph DockerHost["Docker Host"]
+    direction TB
 
-        subgraph PublicNet["Red Pública"]
-            Nginx["Nginx (proxy inverso)\n:80 → :8080"]
-            Flask["Flask (App) :8080"]
-        end
+    %% Contenedores
+    Nginx["Nginx (proxy inverso)\n:80 → :8080"]
+    Flask["Flask (App) :8080"]
+    Postgres["PostgreSQL (DB) :5432"]
 
-        subgraph PrivateNet["Red Privada (internal)"]
-            Flask
-            Postgres["PostgreSQL (DB) :5432"]
-        end
-    end
+    %% Redes (nodos conceptuales)
+    PublicNet["Red Pública"]
+    PrivateNet["Red Privada (internal)"]
+  end
 
-    Nginx -->|proxy_pass| Flask
-    Flask -->|DB_HOST=postgres:5432| Postgres
+  %% Flujo
+  Nginx -->|proxy_pass| Flask
+  Flask -->|DB_HOST=postgres:5432| Postgres
+
+  %% Conexiones a redes (representación)
+  Nginx --- PublicNet
+  Flask --- PublicNet
+  Flask --- PrivateNet
+  Postgres --- PrivateNet
+```
 
 ### 📖 Lectura del diagrama
 
