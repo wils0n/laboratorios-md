@@ -1,260 +1,233 @@
-# 🔐 Guía Práctica: **Secrets y ConfigMaps** en Kubernetes
+# 🔐 Guía Práctica (actualizada): **Secrets y ConfigMaps** en Kubernetes
 **Continuación de la serie:** Pods → ReplicaSets → Deployments → Services → Namespaces → **Secrets & ConfigMaps**
 
-> Basado en el tutorial del curso y buenas prácticas actuales de Kubernetes (v1.30+).
+> Versión actualizada: incluye **paso cero** para crear `./secrets/` con archivos **`api-token`** y **`db-password`**, **manifiestos YAML completos** (no fragmentos) con **nombre de archivo sugerido**, y una explicación de lo nuevo agregado (env vs volúmenes y claves con guiones).
 
 ---
 
-## 🎯 Objetivo
-Aprender a **proteger datos sensibles** y **parametrizar configuración** de tus aplicaciones con:
-- **Secrets**: credenciales, tokens, claves TLS, etc.
-- **ConfigMaps**: variables no sensibles (puertos, hosts, flags).
-- Consumo por **variables de entorno** y por **volúmenes**.
-- Buenas prácticas (RBAC, encryption at rest, rotación, GitOps).
+## ✅ Novedades en esta versión
+- **Paso 0 obligatorio:** crear carpeta `./secrets` con los archivos `api-token` y `db-password` (se usarán para un Secret).
+- **YAMLs completos** con **nombres de archivo** antes de cada bloque, listos para `kubectl apply -f`.
+- **Deployment (env + envFrom):** se añade un ejemplo que **mapea claves con guiones** (`api-token`) a **variables de entorno válidas** (`API_TOKEN`) usando `env` + `secretKeyRef` (recomendado cuando usas claves con `-`).  
+  > Recordatorio: si usas `envFrom`, las claves del Secret pasan a ser nombres de variables. **Las variables de entorno no permiten guiones** (`-`). Con `env` + `secretKeyRef` puedes mapear `api-token` → `API_TOKEN` sin cambiar el nombre del archivo.
 
 ---
 
-## 🧠 Conceptos clave
-- Ambos son objetos *namespaced* (viven dentro de un **Namespace**).
-- **Secrets** almacenan datos **codificados en Base64** (⚠️ no es cifrado). Activa **encryption at rest** y aplica **RBAC**.
-- **ConfigMaps** almacenan pares **clave/valor** no sensibles.
-- Se montan en Pods como **env vars** o **archivos** (volúmenes).
-- Puedes referenciarlos desde **Deployments** / **StatefulSets** / **Jobs**, etc.
+## 0) Preparación: Namespace y carpeta de secretos
 
----
-
-## 🧱 Estructura de laboratorio
-Usaremos el namespace `app-secrets` y un Deployment de ejemplo:
-
+**📄 archivo:** `00-namespace.yaml`
+```yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: app-secrets
+  labels:
+    app: demo
+    stage: dev
+```
+Aplicar y fijar contexto:
 ```bash
-kubectl create namespace app-secrets
+kubectl apply -f 00-namespace.yaml
 kubectl config set-context --current --namespace=app-secrets
 ```
 
----
-
-## 🔑 1) Crear **Secrets**
-
-### A. `generic` desde literales
+**Crear carpeta y archivos locales de secretos (en tu máquina):**
 ```bash
-kubectl create secret generic db-secret   --from-literal=DB_USER=myapp   --from-literal=DB_PASSWORD=devops123
+mkdir -p ./secrets
+echo -n "ABC123TOKEN" > ./secrets/api-token
+echo -n "devops123"   > ./secrets/db-password
 ```
 
-### B. `generic` desde archivo(s)
-```bash
-# Ejemplos: ./secrets/password.txt, ./secrets/api-token
-kubectl create secret generic api-secret --from-file=./secrets/
-```
-
-### C. `docker-registry` (pull de imágenes privadas)
-```bash
-kubectl create secret docker-registry regcred   --docker-server=REGISTRY_URL   --docker-username=USER   --docker-password=TOKEN_OR_PASSWORD   --docker-email=email@org.com
-```
-
-### D. `tls` (para Ingress HTTPS)
-```bash
-kubectl create secret tls site-tls   --cert=fullchain.pem --key=privkey.pem
-```
-
-**Ver y describir**
-```bash
-kubectl get secrets
-kubectl describe secret db-secret
-kubectl get secret db-secret -o yaml   # datos en base64
-```
-
-**Decodificar (para entender la codificación, no para exponer en prod)**:
-```bash
-# Ejemplo en bash
-echo -n "ZGV2b3BzMTIz" | base64 --decode
-```
-
-> 💡 En YAML puedes usar `stringData:` para escribir valores **en claro** (K8s los convertirá a `data` base64 al guardar).
+> **Nota:** Estos nombres de archivo se convertirán en **claves del Secret**. Pueden contener guiones, pero **si luego pretendes usarlos como variables de entorno con `envFrom`, no funcionará** (los guiones no son válidos en nombres de variables). Más abajo verás cómo mapearlos correctamente con `env` + `secretKeyRef`.
 
 ---
 
-## ⚙️ 2) Crear **ConfigMaps**
+## 1) ConfigMap (configuración no sensible)
 
-### A. Desde literales
-```bash
-kubectl create configmap app-config   --from-literal=APP_ENV=dev   --from-literal=APP_PORT=8080   --from-literal=DB_HOST=postgres
-```
-
-### B. Desde archivos o directorios
-```bash
-kubectl create configmap nginx-conf --from-file=./nginx/
-```
-
-**Ver y describir**
-```bash
-kubectl get configmaps
-kubectl describe configmap app-config
-kubectl get configmap app-config -o yaml
-```
-
----
-
-## 🧪 3) Consumo en Pods (env vars y volúmenes)
-
-### A. Deployment con **envFrom** (carga todo el Secret/ConfigMap)
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: demo-app
-  labels: { app: demo }
-spec:
-  replicas: 2
-  selector: { matchLabels: { app: demo } }
-  template:
-    metadata:
-      labels: { app: demo }
-    spec:
-      containers:
-        - name: app
-          image: nginx:1.26-alpine
-          ports: [{ containerPort: 8080 }]
-          envFrom:
-            - secretRef:    { name: db-secret }   # DB_USER, DB_PASSWORD
-            - configMapRef: { name: app-config }  # APP_ENV, APP_PORT, DB_HOST
-```
-
-### B. Deployment con **env** (clave puntual)
-```yaml
-# Fragmento dentro del container
-env:
-  - name: DB_PASSWORD
-    valueFrom:
-      secretKeyRef:
-        name: db-secret
-        key: DB_PASSWORD
-  - name: APP_PORT
-    valueFrom:
-      configMapKeyRef:
-        name: app-config
-        key: APP_PORT
-```
-
-### C. Montaje como **volumen** (archivos)
-```yaml
-# Fragmento dentro del Pod spec
-volumes:
-  - name: secret-vol
-    secret:
-      secretName: db-secret
-  - name: cfg-vol
-    configMap:
-      name: app-config
-
-containers:
-  - name: app
-    image: nginx:1.26-alpine
-    volumeMounts:
-      - name: secret-vol
-        mountPath: /etc/secrets        # crea ficheros por cada clave (p.ej. /etc/secrets/DB_PASSWORD)
-        readOnly: true
-      - name: cfg-vol
-        mountPath: /etc/config         # (p.ej. /etc/config/APP_PORT)
-        readOnly: true
-```
-
-**Aplicar y validar**
-```bash
-kubectl apply -f deployment-demo.yaml
-kubectl get pods
-kubectl describe pod <pod-name>
-kubectl exec -it <pod-name> -- sh
-
-# Dentro del contenedor:
-printenv | grep -E 'DB_|APP_'
-ls -1 /etc/secrets /etc/config
-```
-
-> 🔁 Cambios en Secrets/ConfigMaps **no recargan automáticamente** los procesos. Suele requerir **restart/rollout** del pod (`kubectl rollout restart deploy demo-app`).
-
----
-
-## 🧰 4) Integración con imágenes privadas
-En el `PodSpec` puedes usar el Secret `regcred` para pulls privados:
-```yaml
-imagePullSecrets:
-  - name: regcred
-```
-
----
-
-## 🔒 5) Buenas prácticas
-- **RBAC**: limita quién puede leer/crear **Secrets** (más restrictivo que ConfigMaps).
-- **Encryption at rest**: habilita cifrado de Secrets en etcd (en clústeres gestionados suele venir activado o configurable).
-- **Rotación**: rota credenciales; usa `rollout restart` para propagar cambios.
-- **GitOps**: guarda ConfigMaps en Git; para Secrets, evita texto plano. Considera:
-  - **Sealed Secrets** (Bitnami) o **External Secrets Operator** (AWS/GCP/Azure).
-- **Namespacing**: separa por entornos (`dev`, `staging`, `prod`) y aplica **ResourceQuota** / **LimitRange** por namespace.
-- **Auditoría**: `kubectl get events -A`, *audit logs* del clúster, OPA/Gatekeeper si necesitas políticas.
-- **No** pongas secretos en imágenes ni en logs.
-
----
-
-## 🧹 6) Limpieza
-```bash
-kubectl delete deployment demo-app
-kubectl delete secret db-secret api-secret regcred site-tls --ignore-not-found
-kubectl delete configmap app-config nginx-conf --ignore-not-found
-kubectl delete ns app-secrets
-```
-
----
-
-## 📎 Apéndice A — YAMLs mínimos
-
-### Secret con `stringData` (más cómodo al escribir)
-```yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: db-secret
-type: Opaque
-stringData:
-  DB_USER: myapp
-  DB_PASSWORD: devops123
-```
-
-### ConfigMap sencillo
+**📄 archivo:** `configmap-app.yaml`
 ```yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: app-config
+  namespace: app-secrets
 data:
   APP_ENV: dev
   APP_PORT: "8080"
   DB_HOST: postgres
 ```
 
-### Deployment completo de ejemplo
+Aplicar:
+```bash
+kubectl apply -f configmap-app.yaml
+```
+
+---
+
+## 2) Secrets (credenciales)
+
+### 2.1 `db-secret` (usando `stringData` — cómodo para demo/labs)
+
+**📄 archivo:** `secret-db.yaml`
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: db-secret
+  namespace: app-secrets
+type: Opaque
+stringData:
+  DB_USER: myapp
+  DB_PASSWORD: devops123
+```
+
+Aplicar:
+```bash
+kubectl apply -f secret-db.yaml
+```
+
+### 2.2 `api-secret` (equivalente al directorio `./secrets`)
+
+> Si prefieres mantener los archivos locales y crear el Secret desde la carpeta:
+> ```bash
+> kubectl create secret generic api-secret --from-file=./secrets/ -n app-secrets
+> ```
+> A continuación, su **equivalente en YAML** usando `stringData` (útil para GitOps con valores *placeholder*).
+
+**📄 archivo:** `secret-api.yaml`
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: api-secret
+  namespace: app-secrets
+type: Opaque
+stringData:
+  api-token: "ABC123TOKEN"
+  db-password: "devops123"
+```
+Aplicar:
+```bash
+kubectl apply -f secret-api.yaml
+```
+
+---
+
+## 3) Deployments (tres variantes completas)
+
+### 3.1 Deployment con **solo envFrom** (rápido, pero ojo con claves con guiones)
+**📄 archivo:** `deployment-demo-envfrom.yaml`
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: demo-app
+  namespace: app-secrets
   labels: { app: demo }
 spec:
   replicas: 2
-  selector: { matchLabels: { app: demo } }
+  selector:
+    matchLabels: { app: demo }
   template:
     metadata:
       labels: { app: demo }
     spec:
-      imagePullSecrets:
-        - name: regcred   # opcional si usas registry privado
       containers:
         - name: app
           image: nginx:1.26-alpine
           ports:
             - containerPort: 8080
           envFrom:
-            - secretRef:    { name: db-secret }
-            - configMapRef: { name: app-config }
+            - secretRef:
+                name: db-secret        # DB_USER, DB_PASSWORD (válidos como env vars)
+            - configMapRef:
+                name: app-config       # APP_ENV, APP_PORT, DB_HOST
+          # Nota: No incluimos api-secret aquí porque sus claves llevan guiones.
+```
+
+Aplicar:
+```bash
+kubectl apply -f deployment-demo-envfrom.yaml
+kubectl rollout status deploy/demo-app
+kubectl get pods -o wide
+kubectl exec -it deploy/demo-app -- sh -c 'printenv | grep -E "DB_|APP_"'
+```
+
+---
+
+### 3.2 Deployment **envFrom + env (secretKeyRef)** para mapear claves con guiones → variables válidas
+**📄 archivo:** `deployment-demo-envplus.yaml`
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-app
+  namespace: app-secrets
+  labels: { app: demo }
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: demo }
+  template:
+    metadata:
+      labels: { app: demo }
+    spec:
+      containers:
+        - name: app
+          image: nginx:1.26-alpine
+          ports:
+            - containerPort: 8080
+
+          # Trae todas las claves de estos objetos como variables (válidas)
+          envFrom:
+            - secretRef:    { name: db-secret }   # DB_USER, DB_PASSWORD
+            - configMapRef: { name: app-config }  # APP_ENV, APP_PORT, DB_HOST
+
+          # Mapea claves con guiones (api-secret) a nombres de variables válidos
+          env:
+            - name: API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: api-secret
+                  key: api-token
+            - name: DB_PASSWORD_FILE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: api-secret
+                  key: db-password
+```
+
+Aplicar y validar:
+```bash
+kubectl apply -f deployment-demo-envplus.yaml
+kubectl rollout status deploy/demo-app
+kubectl exec -it deploy/demo-app -- sh -c 'printenv | grep -E "DB_|APP_|TOKEN"'
+```
+
+> **Explicación:** `envFrom` funciona bien para claves como `DB_PASSWORD`, pero **no** para `api-token`. Con `env` + `secretKeyRef` puedes **renombrar** la clave a una variable válida (`API_TOKEN`).
+
+---
+
+### 3.3 Deployment con **volúmenes** (archivos en `/etc/secrets` y `/etc/config`)
+**📄 archivo:** `deployment-demo-volumes.yaml`
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-app
+  namespace: app-secrets
+  labels: { app: demo }
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: demo }
+  template:
+    metadata:
+      labels: { app: demo }
+    spec:
+      containers:
+        - name: app
+          image: nginx:1.26-alpine
           volumeMounts:
             - name: secret-vol
               mountPath: /etc/secrets
@@ -265,12 +238,38 @@ spec:
       volumes:
         - name: secret-vol
           secret:
-            secretName: db-secret
+            secretName: api-secret     # Monta archivos: /etc/secrets/api-token, /etc/secrets/db-password
         - name: cfg-vol
           configMap:
-            name: app-config
+            name: app-config           # Monta archivos: /etc/config/APP_ENV, /etc/config/APP_PORT, etc.
+```
+
+Aplicar y validar:
+```bash
+kubectl apply -f deployment-demo-volumes.yaml
+kubectl rollout status deploy/demo-app
+kubectl exec -it deploy/demo-app -- sh -c 'ls -1 /etc/secrets /etc/config && echo "---"; for f in /etc/secrets/* /etc/config/*; do echo $f:; cat $f; echo; done'
+```
+
+> **Cuándo usar volúmenes:** cuando tu app espera **archivos** (certs, config files) o cuando tus claves no son válidas como variables de entorno.
+
+---
+
+## 4) Limpieza del laboratorio
+```bash
+kubectl delete deployment demo-app --ignore-not-found
+kubectl delete secret api-secret db-secret --ignore-not-found
+kubectl delete configmap app-config --ignore-not-found
+kubectl delete ns app-secrets --ignore-not-found
 ```
 
 ---
 
-**¡Listo!** Ya puedes gestionar configuración y secretos de forma segura y repetible en Kubernetes, integrándolos con tus Deployments y flujos CI/CD.
+## 🧠 Resumen
+- **ConfigMap**: config **no sensible** (puertos, hosts).  
+- **Secret**: **credenciales/tokens**.  
+- **envFrom** es rápido, pero **requiere claves válidas** para variables (sin guiones).  
+- **env + secretKeyRef** permite **mapear** claves con guiones a variables válidas.  
+- **Volúmenes** montan claves como **archivos** (nombres con guiones sin problema).
+
+¡Listo! Con estos manifiestos completos y el paso cero de `./secrets`, puedes recrear el laboratorio de forma predecible.
