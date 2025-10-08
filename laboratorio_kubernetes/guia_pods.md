@@ -18,6 +18,11 @@ Se usa para pruebas simples o demostraciones.
 ```bash
 kubectl run my-nginx --image=nginx --restart=Never
 ```
+o 
+
+```bash
+kubectl run my-nginx --image=nginx --restart=Never -n default
+```
 
 ### 📘 Explicación
 
