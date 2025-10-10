@@ -153,6 +153,18 @@ kubectl get pods -o wide
 kubectl exec -it deploy/demo-app -- sh -c 'printenv | grep -E "DB_|APP_"'
 ```
 
+### Resumen de la configuración anterior
+
+Esta configuración despliega una aplicación llamada `demo-app` usando un Deployment en el namespace `app-secrets`. Sus principales características son:
+
+- **ReplicaSet:** Se crean 2 réplicas del contenedor basado en la imagen `nginx:1.26-alpine`, expuesto en el puerto 8080.
+- **Variables de entorno:** El contenedor recibe variables de entorno desde dos fuentes:
+  - **Secret `db-secret`:** Proporciona las variables `DB_USER` y `DB_PASSWORD` (credenciales de base de datos).
+  - **ConfigMap `app-config`:** Proporciona las variables `APP_ENV`, `APP_PORT` y `DB_HOST` (configuración de la aplicación).
+- **Seguridad:** No se incluye el Secret `api-secret` porque sus claves contienen guiones, lo cual no es válido para nombres de variables de entorno en Kubernetes.
+- **Namespace:** Todo se despliega en el namespace `app-secrets` para aislar los recursos.
+
+Esta configuración permite gestionar credenciales y parámetros de configuración de forma segura y centralizada usando recursos nativos de Kubernetes.
 ---
 
 ### 3.2 Deployment **envFrom + env (secretKeyRef)** para mapear claves con guiones → variables válidas
