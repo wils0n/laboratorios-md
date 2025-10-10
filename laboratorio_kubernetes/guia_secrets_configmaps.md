@@ -57,9 +57,9 @@ kubectl config set-context --current --namespace=app-secrets
 - Cambiar de namespace en comandos:  
   `kubectl -n <nombre> get pods`
 - Configurar contexto:  
+  `kubectl config set-context <nombre-contexto> --namespace=<nombre-namespace>`
 
-
-**Crear carpeta y archivos locales de secretos (en tu máquina):**
+### Crear carpeta y archivos locales de secretos (en tu máquina):**
 ```bash
 mkdir -p ./secrets
 echo -n "ABC123TOKEN" > ./secrets/api-token
