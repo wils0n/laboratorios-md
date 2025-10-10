@@ -164,7 +164,7 @@ Esta configuración despliega una aplicación llamada `demo-app` usando un Deplo
 - **Seguridad:** No se incluye el Secret `api-secret` porque sus claves contienen guiones, lo cual no es válido para nombres de variables de entorno en Kubernetes.
 - **Namespace:** Todo se despliega en el namespace `app-secrets` para aislar los recursos.
 
-Esta configuración permite gestionar credenciales y parámetros de configuración de forma segura y centralizada usando recursos nativos de Kubernetes.
+>Esta configuración permite gestionar credenciales y parámetros de configuración de forma segura y centralizada usando recursos nativos de Kubernetes.
 ---
 
 ### 3.2 Deployment **envFrom + env (secretKeyRef)** para mapear claves con guiones → variables válidas
