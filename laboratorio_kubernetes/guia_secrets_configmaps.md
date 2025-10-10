@@ -1,5 +1,5 @@
 # 🔐 Guía Práctica (actualizada): **Secrets y ConfigMaps** en Kubernetes
-**Continuación de la serie:** Pods → ReplicaSets → Deployments → Services → Namespaces → **Secrets & ConfigMaps**
+**Continuación de la serie:** Pods → ReplicaSets → Deployments -> **Secrets & ConfigMaps**
 
 > Versión actualizada: incluye **paso cero** para crear `./secrets/` con archivos **`api-token`** y **`db-password`**, **manifiestos YAML completos** (no fragmentos) con **nombre de archivo sugerido**, y una explicación de lo nuevo agregado (env vs volúmenes y claves con guiones).
 
