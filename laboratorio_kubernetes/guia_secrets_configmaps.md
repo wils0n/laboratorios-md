@@ -14,6 +14,20 @@
 ---
 
 ## 0) Preparación: Namespace y carpeta de secretos
+## ¿Qué son los Namespaces en Kubernetes?
+
+Los namespaces son una forma de agrupar y organizar los recursos de Kubernetes (pods, deployments, services, etc). Permiten gestionar cuotas de recursos, aplicar políticas de seguridad y configuraciones específicas para cada grupo.
+
+### ¿Qué hace y qué no hace un namespace?
+- **Hace:** Organiza recursos, permite aplicar RBAC, políticas de red y cuotas de recursos.
+- **No hace:** No es una barrera de seguridad; los pods de diferentes namespaces pueden comunicarse por red si no se aplican políticas de red.
+  `kubectl config set-context <nombre-contexto> --namespace=<nombre-namespace>`
+
+### Consideraciones de seguridad
+- Los namespaces solo separan recursos lógicamente.
+- Para aislamiento real, usar Network Policies y RBAC.
+- El namespace por defecto es `default`.
+
 
 **📄 archivo:** `00-namespace.yaml`
 ```yaml
@@ -30,6 +44,20 @@ Aplicar y fijar contexto:
 kubectl apply -f 00-namespace.yaml
 kubectl config set-context --current --namespace=app-secrets
 ```
+
+
+### Operaciones comunes
+- Listar namespaces:  
+  `kubectl get ns`  
+  `kubectl get ns --show-labels`
+- Crear namespace:  
+  `kubectl create namespace <nombre>`
+- Borrar namespace:  
+  `kubectl delete ns <nombre>`
+- Cambiar de namespace en comandos:  
+  `kubectl -n <nombre> get pods`
+- Configurar contexto:  
+
 
 **Crear carpeta y archivos locales de secretos (en tu máquina):**
 ```bash
