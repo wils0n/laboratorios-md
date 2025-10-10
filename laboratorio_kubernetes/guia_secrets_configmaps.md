@@ -216,7 +216,27 @@ kubectl rollout status deploy/demo-app
 kubectl exec -it deploy/demo-app -- sh -c 'printenv | grep -E "DB_|APP_|TOKEN"'
 ```
 
-> **Explicación:** `envFrom` funciona bien para claves como `DB_PASSWORD`, pero **no** para `api-token`. Con `env` + `secretKeyRef` puedes **renombrar** la clave a una variable válida (`API_TOKEN`).
+### Resumen de la configuración avanzada de Deployment
+
+Esta configuración de Kubernetes despliega la aplicación `demo-app` en el namespace `app-secrets` y permite inyectar variables de entorno tanto desde Secrets y ConfigMaps con nombres válidos, como desde Secrets cuyas claves contienen guiones.
+
+#### Características principales
+
+- **ReplicaSet:** Despliega 2 réplicas del contenedor `nginx:1.26-alpine` en el puerto 8080.
+- **Variables de entorno estándar:** Usa `envFrom` para importar todas las claves válidas de:
+  - Secret `db-secret` (`DB_USER`, `DB_PASSWORD`)
+  - ConfigMap `app-config` (`APP_ENV`, `APP_PORT`, `DB_HOST`)
+- **Variables con guiones:** Usa la sección `env` para mapear claves de Secrets que contienen guiones a nombres válidos de variables de entorno:
+  - `api-token` (de `api-secret`) se mapea a la variable `API_TOKEN`
+  - `db-password` (de `api-secret`) se mapea a la variable `DB_PASSWORD_FILE_SECRET`
+
+#### ¿Cuándo usar esta forma?
+
+Utiliza esta configuración cuando necesitas exponer valores de Secrets o ConfigMaps como variables de entorno en el contenedor, pero algunas claves contienen guiones (`-`) o caracteres no válidos para nombres de variables de entorno. El bloque `env` permite asignar manualmente un nombre válido a cada variable y vincularlo a la clave original del Secret o ConfigMap.
+
+Esto es útil para:
+- Cumplir con restricciones de nombres de variables de entorno en el sistema operativo.
+- Mantener la seguridad y flexibilidad en la gestión de credenciales y configuraciones sensibles.
 
 ---
 
@@ -263,7 +283,23 @@ kubectl rollout status deploy/demo-app
 kubectl exec -it deploy/demo-app -- sh -c 'ls -1 /etc/secrets /etc/config && echo "---"; for f in /etc/secrets/* /etc/config/*; do echo $f:; cat $f; echo; done'
 ```
 
-> **Cuándo usar volúmenes:** cuando tu app espera **archivos** (certs, config files) o cuando tus claves no son válidas como variables de entorno.
+### Resumen de configuración: Montaje de Secrets y ConfigMaps como volúmenes
+
+Esta configuración de Kubernetes despliega la aplicación `demo-app` y utiliza volúmenes para exponer los valores de Secrets y ConfigMaps dentro del contenedor.
+
+#### Características principales
+
+- **Montaje de Secrets:** Los datos sensibles (como credenciales) almacenados en un Secret se montan como archivos en el directorio `/etc/secrets` dentro del contenedor.
+- **Montaje de ConfigMaps:** Los parámetros de configuración se montan como archivos en el directorio `/etc/config` dentro del contenedor.
+- **Acceso seguro:** El contenedor puede leer los valores directamente desde los archivos, lo que es útil para aplicaciones que esperan archivos en vez de variables de entorno.
+- **Separación de datos:** Mantiene separados los datos sensibles (Secrets) y los de configuración (ConfigMaps), facilitando la gestión y aumentando la seguridad.
+
+#### ¿Cuándo usar esta forma?
+
+Utiliza esta configuración cuando tu aplicación necesita leer archivos de configuración o credenciales desde el sistema de archivos, en vez de variables de entorno. Es especialmente útil para aplicaciones que requieren rutas específicas para archivos de configuración o certificados.
+
+Esta forma también ayuda a mantener buenas prácticas de seguridad y organización en el manejo de datos sensibles y configuraciones en Kubernetes.
+
 
 ---
 
