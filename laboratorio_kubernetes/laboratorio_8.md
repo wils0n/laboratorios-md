@@ -885,7 +885,8 @@ Este método inyecta valores de un Secret como variables de entorno de forma seg
 ```
 Flask → DB_HOST="postgres-service" → DNS de Kubernetes → IP del Service → Pod de PostgreSQL
 ```
-```
+
+``````mermaid
 sequenceDiagram
     participant F as Flask Pod
     participant DNS as DNS Kubernetes<br/>(CoreDNS)
@@ -1171,7 +1172,7 @@ spec:
 Usuario → http://IP_DEL_NODO:30080 → NodePort Service → Nginx Pods → Flask Pods → PostgreSQL
 ```
 
-```
+```mermaid
 graph LR
     U[👤 Usuario<br/>Internet] -->|http://192.168.49.2:30080| N[🖥️ Nodo Kubernetes<br/>IP: 192.168.49.2]
     N -->|Puerto 30080| NP[NodePort Service<br/>nginx-service<br/>NodePort: 30080]
@@ -1190,7 +1191,7 @@ graph LR
     style PG fill:#2ecc71,stroke:#27ae60,color:#fff
 ```
 
-```
+```mermaid
 sequenceDiagram
     participant U as 👤 Usuario<br/>(Internet)
     participant N as 🖥️ Nodo K8s<br/>192.168.49.2
