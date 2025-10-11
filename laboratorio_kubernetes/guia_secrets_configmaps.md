@@ -1,5 +1,5 @@
 # 🔐 Guía Práctica (actualizada): **Secrets y ConfigMaps** en Kubernetes
-**Continuación de la serie:** Pods → ReplicaSets → Deployments → Services → Namespaces → **Secrets & ConfigMaps**
+**Continuación de la serie:** Pods → ReplicaSets → Deployments -> **Secrets & ConfigMaps**
 
 > Versión actualizada: incluye **paso cero** para crear `./secrets/` con archivos **`api-token`** y **`db-password`**, **manifiestos YAML completos** (no fragmentos) con **nombre de archivo sugerido**, y una explicación de lo nuevo agregado (env vs volúmenes y claves con guiones).
 
@@ -14,6 +14,20 @@
 ---
 
 ## 0) Preparación: Namespace y carpeta de secretos
+## ¿Qué son los Namespaces en Kubernetes?
+
+Los namespaces son una forma de agrupar y organizar los recursos de Kubernetes (pods, deployments, services, etc). Permiten gestionar cuotas de recursos, aplicar políticas de seguridad y configuraciones específicas para cada grupo.
+
+### ¿Qué hace y qué no hace un namespace?
+- **Hace:** Organiza recursos, permite aplicar RBAC, políticas de red y cuotas de recursos.
+- **No hace:** No es una barrera de seguridad; los pods de diferentes namespaces pueden comunicarse por red si no se aplican políticas de red.
+  `kubectl config set-context <nombre-contexto> --namespace=<nombre-namespace>`
+
+### Consideraciones de seguridad
+- Los namespaces solo separan recursos lógicamente.
+- Para aislamiento real, usar Network Policies y RBAC.
+- El namespace por defecto es `default`.
+
 
 **📄 archivo:** `00-namespace.yaml`
 ```yaml
@@ -31,7 +45,21 @@ kubectl apply -f 00-namespace.yaml
 kubectl config set-context --current --namespace=app-secrets
 ```
 
-**Crear carpeta y archivos locales de secretos (en tu máquina):**
+
+### Operaciones comunes
+- Listar namespaces:  
+  `kubectl get ns`  
+  `kubectl get ns --show-labels`
+- Crear namespace:  
+  `kubectl create namespace <nombre>`
+- Borrar namespace:  
+  `kubectl delete ns <nombre>`
+- Cambiar de namespace en comandos:  
+  `kubectl -n <nombre> get pods`
+- Configurar contexto:  
+  `kubectl config set-context <nombre-contexto> --namespace=<nombre-namespace>`
+
+### Crear carpeta y archivos locales de secretos (en tu máquina):**
 ```bash
 mkdir -p ./secrets
 echo -n "ABC123TOKEN" > ./secrets/api-token
@@ -153,6 +181,18 @@ kubectl get pods -o wide
 kubectl exec -it deploy/demo-app -- sh -c 'printenv | grep -E "DB_|APP_"'
 ```
 
+### Resumen de la configuración anterior
+
+Esta configuración despliega una aplicación llamada `demo-app` usando un Deployment en el namespace `app-secrets`. Sus principales características son:
+
+- **ReplicaSet:** Se crean 2 réplicas del contenedor basado en la imagen `nginx:1.26-alpine`, expuesto en el puerto 8080.
+- **Variables de entorno:** El contenedor recibe variables de entorno desde dos fuentes:
+  - **Secret `db-secret`:** Proporciona las variables `DB_USER` y `DB_PASSWORD` (credenciales de base de datos).
+  - **ConfigMap `app-config`:** Proporciona las variables `APP_ENV`, `APP_PORT` y `DB_HOST` (configuración de la aplicación).
+- **Seguridad:** No se incluye el Secret `api-secret` porque sus claves contienen guiones, lo cual no es válido para nombres de variables de entorno en Kubernetes.
+- **Namespace:** Todo se despliega en el namespace `app-secrets` para aislar los recursos.
+
+>Esta configuración permite gestionar credenciales y parámetros de configuración de forma segura y centralizada usando recursos nativos de Kubernetes.
 ---
 
 ### 3.2 Deployment **envFrom + env (secretKeyRef)** para mapear claves con guiones → variables válidas
@@ -204,7 +244,27 @@ kubectl rollout status deploy/demo-app
 kubectl exec -it deploy/demo-app -- sh -c 'printenv | grep -E "DB_|APP_|TOKEN"'
 ```
 
-> **Explicación:** `envFrom` funciona bien para claves como `DB_PASSWORD`, pero **no** para `api-token`. Con `env` + `secretKeyRef` puedes **renombrar** la clave a una variable válida (`API_TOKEN`).
+### Resumen de la configuración avanzada de Deployment
+
+Esta configuración de Kubernetes despliega la aplicación `demo-app` en el namespace `app-secrets` y permite inyectar variables de entorno tanto desde Secrets y ConfigMaps con nombres válidos, como desde Secrets cuyas claves contienen guiones.
+
+#### Características principales
+
+- **ReplicaSet:** Despliega 2 réplicas del contenedor `nginx:1.26-alpine` en el puerto 8080.
+- **Variables de entorno estándar:** Usa `envFrom` para importar todas las claves válidas de:
+  - Secret `db-secret` (`DB_USER`, `DB_PASSWORD`)
+  - ConfigMap `app-config` (`APP_ENV`, `APP_PORT`, `DB_HOST`)
+- **Variables con guiones:** Usa la sección `env` para mapear claves de Secrets que contienen guiones a nombres válidos de variables de entorno:
+  - `api-token` (de `api-secret`) se mapea a la variable `API_TOKEN`
+  - `db-password` (de `api-secret`) se mapea a la variable `DB_PASSWORD_FILE_SECRET`
+
+#### ¿Cuándo usar esta forma?
+
+Utiliza esta configuración cuando necesitas exponer valores de Secrets o ConfigMaps como variables de entorno en el contenedor, pero algunas claves contienen guiones (`-`) o caracteres no válidos para nombres de variables de entorno. El bloque `env` permite asignar manualmente un nombre válido a cada variable y vincularlo a la clave original del Secret o ConfigMap.
+
+Esto es útil para:
+- Cumplir con restricciones de nombres de variables de entorno en el sistema operativo.
+- Mantener la seguridad y flexibilidad en la gestión de credenciales y configuraciones sensibles.
 
 ---
 
@@ -251,7 +311,23 @@ kubectl rollout status deploy/demo-app
 kubectl exec -it deploy/demo-app -- sh -c 'ls -1 /etc/secrets /etc/config && echo "---"; for f in /etc/secrets/* /etc/config/*; do echo $f:; cat $f; echo; done'
 ```
 
-> **Cuándo usar volúmenes:** cuando tu app espera **archivos** (certs, config files) o cuando tus claves no son válidas como variables de entorno.
+### Resumen de configuración: Montaje de Secrets y ConfigMaps como volúmenes
+
+Esta configuración de Kubernetes despliega la aplicación `demo-app` y utiliza volúmenes para exponer los valores de Secrets y ConfigMaps dentro del contenedor.
+
+#### Características principales
+
+- **Montaje de Secrets:** Los datos sensibles (como credenciales) almacenados en un Secret se montan como archivos en el directorio `/etc/secrets` dentro del contenedor.
+- **Montaje de ConfigMaps:** Los parámetros de configuración se montan como archivos en el directorio `/etc/config` dentro del contenedor.
+- **Acceso seguro:** El contenedor puede leer los valores directamente desde los archivos, lo que es útil para aplicaciones que esperan archivos en vez de variables de entorno.
+- **Separación de datos:** Mantiene separados los datos sensibles (Secrets) y los de configuración (ConfigMaps), facilitando la gestión y aumentando la seguridad.
+
+#### ¿Cuándo usar esta forma?
+
+Utiliza esta configuración cuando tu aplicación necesita leer archivos de configuración o credenciales desde el sistema de archivos, en vez de variables de entorno. Es especialmente útil para aplicaciones que requieren rutas específicas para archivos de configuración o certificados.
+
+Esta forma también ayuda a mantener buenas prácticas de seguridad y organización en el manejo de datos sensibles y configuraciones en Kubernetes.
+
 
 ---
 
