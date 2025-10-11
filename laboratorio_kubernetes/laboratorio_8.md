@@ -46,6 +46,7 @@ flask-k8s-app/
 │   ├── 10-nginx-deployment.yaml
 │   └── 11-nginx-service.yaml
 └── README.md
+└── capturas/
 ```
 
 ---
