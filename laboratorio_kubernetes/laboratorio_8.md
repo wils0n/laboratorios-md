@@ -343,6 +343,12 @@ wget -qO- http://flask-service:5000/
 exit
 ```
 
+> Si el puerto está en uso, buscar el proceso y ejecutar kill
+```
+lsof -i :8080
+kill -9 <PID>
+```
+
 **Capturas requeridas:**
 - `kubectl get pods -o wide`
 - `kubectl get svc`
@@ -555,11 +561,6 @@ kubectl logs -l app=postgres
 
 # Verificar que el volumen está montado
 kubectl describe pod -l app=postgres | grep -A 5 "Mounts:"
-```
-
-```bash
-kubectl apply -f k8s/06-postgres-deployment.yaml
-kubectl get pods -l app=postgres
 ```
 
 ### 3.4 Service para PostgreSQL
@@ -1428,24 +1429,10 @@ docker rmi flask-k8s-app:1.0 flask-k8s-app:2.0
 
 ---
 
-## Entregables
+## Detalle de Entregables
 
-1. **Repositorio GitHub** con:
-   - Código de la aplicación (`app/`)
-   - Manifiestos de Kubernetes (`k8s/`)
-   - README con instrucciones
+- [Link detalle ](https://docs.google.com/document/d/1g_x9PpUlf_I_99Non8_fQCvNY8pI2tV-8YLTa1a_RSc/edit?usp=sharing)
 
-2. **Capturas de pantalla:**
-   - `kubectl get all` mostrando todos los recursos
-   - `kubectl get pods -o wide`
-   - Respuesta de los endpoints a través de Nginx
-   - `kubectl describe service nginx-service`
-   - Logs de al menos un componente
-
-3. **Evidencias de funcionamiento:**
-   - Curl o navegador mostrando `/visits` y `/stats`
-   - Prueba de escalado
-   - Conexión exitosa a PostgreSQL
 
 ---
 
