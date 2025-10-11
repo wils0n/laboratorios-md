@@ -886,7 +886,7 @@ Este método inyecta valores de un Secret como variables de entorno de forma seg
 Flask → DB_HOST="postgres-service" → DNS de Kubernetes → IP del Service → Pod de PostgreSQL
 ```
 
-``````mermaid
+```mermaid
 sequenceDiagram
     participant F as Flask Pod
     participant DNS as DNS Kubernetes<br/>(CoreDNS)
