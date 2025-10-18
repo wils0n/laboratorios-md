@@ -171,7 +171,20 @@ env:
   ECR_REPO_NAME: ${{ vars.ECR_REPO_NAME }}
 
 jobs:
+  lint:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+        - uses: actions/setup-python@v5
+          with:
+            python-version: ${{ env.PYTHON_VERSION }}
+        - run: |
+            pip install flake8 black isort
+            flake8 . --count --select=E9,F63,F7,F82 --show-source
+            black --check .
+            isort --check-only .
   test:
+    needs: lint
     runs-on: ubuntu-latest
     outputs:
       build_tag: ${{ steps.meta.outputs.tag }}
