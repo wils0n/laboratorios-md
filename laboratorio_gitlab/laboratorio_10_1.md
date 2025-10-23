@@ -22,6 +22,7 @@
 ✅ Cuenta en GitLab ([https://gitlab.com/](https://gitlab.com/))  
 ✅ Cuenta en Docker Hub ([https://hub.docker.com/](https://hub.docker.com/))  
 ✅ Proyecto en GitLab con código Python (`hello.py`, `requirements.txt`, `tests/`) 
+
 ✅ Familiaridad con Docker y contenedores
 
 ---
