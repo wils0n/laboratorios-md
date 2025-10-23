@@ -1,4 +1,4 @@
-# Laboratorio 11.1: CI/CD en GitLab - Publicación de Imágenes Docker a Docker Hub
+# Laboratorio 10.1: CI/CD en GitLab - Publicación de Imágenes Docker a Docker Hub
 
 **Duración estimada:** 60–90 min  
 **Nivel:** Intermedio  
