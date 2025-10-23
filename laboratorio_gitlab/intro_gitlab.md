@@ -250,7 +250,7 @@ graph TB
     TestStage --> TestResults
     TestStage --> Coverage
     PackageStage --> AppZip
-    TestStage -.->|needs: [Test]| PackageStage
+    TestStage -.->|needs| PackageStage
     style Trigger fill:#e1f5ff
     style TestStage fill:#e8f5e9
     style PackageStage fill:#fff3e0
