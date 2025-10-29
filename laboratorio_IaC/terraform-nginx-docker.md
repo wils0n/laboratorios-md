@@ -50,6 +50,7 @@ terraform-nginx/
 ├── outputs.tf
 ├── terraform.tfvars
 └── index.html
+└── Dockerfile
 ```
 
 ---
