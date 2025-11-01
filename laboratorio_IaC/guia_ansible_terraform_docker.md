@@ -1,4 +1,4 @@
-# Guía: Terraform + Ansible + Docker (100% YAML)
+# Guía: Terraform + Ansible + Docker 
 
 ## Objetivos del laboratorio
 
