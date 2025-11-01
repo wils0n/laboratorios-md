@@ -25,6 +25,47 @@ ansible-docker-terraform-v3/
    └─ playbook.yml
 ```
 
+## Archivos necesarios
+main.tf
+```yaml
+terraform {
+  required_providers {
+    docker = {
+      source  = "kreuzwerker/docker"
+      version = "~> 3.0"
+    }
+  }
+  required_version = ">= 1.5.0"
+}
+
+provider "docker" {}
+
+resource "docker_network" "demo" {
+  name = "demo"
+}
+
+resource "docker_image" "debian" {
+  name         = "debian:bookworm"
+  keep_locally = true
+}
+
+resource "docker_container" "web" {
+  name  = "web1"
+  image = docker_image.debian.image_id
+  networks_advanced {
+    name = docker_network.demo.name
+  }
+  command = ["sleep", "infinity"]
+  ports {
+    internal = 80
+    external = 8080
+  }
+  restart = "always"
+  tty     = true
+}
+```
+
+
 ## Ejecución
 ```bash
 cd terraform
@@ -90,7 +131,7 @@ collections:
    - Qué hace: ejecuta el playbook en los hosts indicados por `ansible.cfg`/`inventory.yml`.
    - Importante: cuando Ansible ejecuta un módulo (por ejemplo `copy`, `stat`), transfiere un pequeño script Python y lo ejecuta en el host objetivo. Por eso el host debe disponer de un intérprete Python (normalmente `python3`), o Ansible fallará con errores como `/usr/bin/python3: not found`.
 
-### Explicación del `playbook.yml` (anotado)
+### Explicación del `playbook.yml` 
 
 Playbook (resumido y comentado):
 
@@ -133,6 +174,25 @@ Playbook (resumido y comentado):
                nginx
             fi
 
+```
+### Contenido del `inventory.yml` 
+```yaml
+all:
+  hosts:
+    web1:
+      ansible_connection: community.docker.docker
+
+
+```
+
+### Contenido del `ansible.cfg` 
+```bash
+[defaults]
+inventory = ./inventory.yml
+host_key_checking = False
+retry_files_enabled = False
+stdout_callback = yaml
+interpreter_python = auto_silent
 ```
 
 Puntos clave:
