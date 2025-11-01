@@ -69,7 +69,10 @@ resource "docker_container" "web" {
 ## Ejecución
 ```bash
 cd terraform
-terraform init && terraform apply -auto-approve
+terraform init
+terraform validate
+terraform plan
+terraform apply -auto-approve
 
 cd ../ansible
 ansible-galaxy collection install -r requirements.yml
@@ -138,42 +141,40 @@ Playbook (resumido y comentado):
 ```yaml
 ---
 - name: Configurar contenedor Docker con Ansible (sin AWS)
-   hosts: all
-   gather_facts: false                  # No recopilar facts (más rápido; en contenedores a veces innecesario)
-   connection: community.docker.docker  # Usa el plugin de conexión Docker -> ejecuta comandos dentro del contenedor
+  hosts: all
+  gather_facts: false
+  connection: community.docker.docker
 
-   vars:
-      index_title: "Hola desde Ansible + Docker + Terraform"
-      index_message: "Configurado 100% con YAML 🚀"
+  vars:
+    index_title: "Hola desde Ansible + Docker + Terraform"
+    index_message: "Configurado 100% con YAML 🚀"
 
-   tasks:
-      - name: Actualizar apt e instalar nginx
-         raw: |                             # raw ejecuta el bloque tal cual en el shell del contenedor
-            apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq nginx curl python3
-         # NOTA: instalamos `python3` porque Ansible necesita un intérprete en el contenedor para ejecutar módulos
+  tasks:
+    - name: Actualizar apt e instalar nginx
+      raw: |
+        apt-get update -qq &&         DEBIAN_FRONTEND=noninteractive apt-get install -y -qq nginx curl python3
 
-      - name: Crear archivo index.html con mensaje
-         copy:
-            dest: /var/www/html/index.html
-            content: |                         # Usa el módulo `copy` (requiere Python en el contenedor)
-               <!doctype html>
-               <html lang="es">
-               <head><meta charset="utf-8"><title>{{ index_title }}</title></head>
-               <body style="font-family: system-ui, sans-serif;">
-                  <h1>{{ index_title }}</h1>
-                  <p>{{ index_message }}</p>
-                  <p><strong>Generado por Ansible</strong></p>
-               </body>
-               </html>
+    - name: Crear archivo index.html con mensaje
+      copy:
+        dest: /var/www/html/index.html
+        content: |
+          <!doctype html>
+          <html lang="es">
+          <head><meta charset="utf-8"><title>{{ index_title }}</title></head>
+          <body style="font-family: system-ui, sans-serif;">
+            <h1>{{ index_title }}</h1>
+            <p>{{ index_message }}</p>
+            <p><strong>Generado por Ansible</strong></p>
+          </body>
+          </html>
 
-      - name: Iniciar o reiniciar nginx
-         shell: |                            # shell ejecuta un comando; comprobamos si ya existe nginx y lo reiniciamos
-            if pgrep -x nginx >/dev/null; then
-               pkill -HUP nginx
-            else
-               nginx
-            fi
-
+    - name: Iniciar o reiniciar nginx
+      shell: |
+        if pgrep -x nginx >/dev/null; then
+          pkill -HUP nginx
+        else
+          nginx
+        fi
 ```
 ### Contenido del `inventory.yml` 
 ```yaml
@@ -336,4 +337,3 @@ Notas finales
 
 - Para entornos de CI/CD y despliegues reproducibles es buena idea usar un virtualenv o contenedor (Docker) para el control node de Ansible.
 - Si trabajas en Windows, WSL2 proporciona casi la misma experiencia que Linux y evita problemas de compatibilidad.
-
