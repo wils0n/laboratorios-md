@@ -44,7 +44,7 @@ juice-shop-devsecops/
 ### 1.1 Clonar el proyecto
 
 ```bash
-git clone https://gitlab.com/pytuxi/juice-shop-devsecops.git
+git clone https://github.com/wils0n/juice-shop-devsecops
 cd juice-shop-devsecops
 mkdir -p reports sbom
 ```
