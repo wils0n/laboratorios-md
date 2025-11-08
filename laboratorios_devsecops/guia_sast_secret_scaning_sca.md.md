@@ -1,4 +1,4 @@
-# Laboratorio 11.2: Análisis de Dependencias y Secret Scanning con Trivy, Snyk, Gitleaks y TruffleHog
+# Laboratorio 12.2: Análisis de Dependencias y Secret Scanning con Trivy, Snyk, Gitleaks y TruffleHog
 
 **Duración estimada:** 120–150 min  
 **Nivel:** Intermedio / Avanzado  
