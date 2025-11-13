@@ -206,7 +206,7 @@ zap_scan:
 
 ## 📘 Entregables
 
-1.  **Carpeta de reportes** (`zap-report/`) con al menos dos reportes (ej. `zap-default.html` y `zap-fullscan.html`).
+1.  **Carpeta de reportes** (`zap-report/`) con al menos dos reportes (ej. `zap-default.html` y `zap-login.html`).
 2.  **Capturas de pantalla** de:
     -   La ejecución de un comando de análisis activo en la terminal.
     -   El reporte HTML de ZAP mostrando las vulnerabilidades encontradas.
