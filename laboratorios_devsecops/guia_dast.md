@@ -214,6 +214,10 @@ zap_scan:
 3.  **Documento de reflexión**:
     -   ¿Cuál es la diferencia clave entre un análisis pasivo y uno activo? ¿Cuándo usarías cada uno?
     -   Menciona dos vulnerabilidades críticas que encontraste y explica brevemente su riesgo.
+4.  **Notas importantes:**
+    - Deadline: Viernes 14
+    - Asunto: Laboratorio 13.1
+    - Link del repositorio en gitlab (público)
 
 ---
 
