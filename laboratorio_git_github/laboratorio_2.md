@@ -304,7 +304,7 @@ Usaremos **eShopOnWeb**
     git status
     ```
 
-2.  Crea y cambia a una nueva rama llamada `dev`:
+2.  Crea y cambia a una nueva rama llamada `develop`:
 
     ```bash
     git checkout -b develop
@@ -412,7 +412,7 @@ Usaremos **eShopOnWeb**
     // Testing my first PR
     ```
 
-    Realiza **Commit** en la rama `dev`:
+    Realiza **Commit** en la rama `feature/new-feature-1`:
 
     ```bash
     git add src/Web/Program.cs
@@ -525,9 +525,9 @@ git branch
 git branch -a                # ver todas las ramas (locales y remotas)
 
 # Cambiar/crear rama
-git checkout -b dev          # crear y moverse
+git checkout -b feature/new-feature-1          # crear y moverse
 git checkout main            # volver a main
-git switch -c dev            # alternativa moderna para crear rama
+git switch -c feature/new-feature-1            # alternativa moderna para crear rama
 
 # Staging/commit
 git add archivo.txt          # agregar archivo específico
@@ -541,7 +541,7 @@ git commit -am "refactor(core): mejora estructura de datos"
 # Sincronizar
 git pull                     # traer cambios del remoto
 git push                     # subir cambios
-git push -u origin dev       # publicar rama por 1ª vez
+git push -u origin feature/new-feature-1        # publicar rama por 1ª vez
 
 # Historial y diferencias
 git log --oneline            # historial compacto
@@ -557,8 +557,8 @@ git push origin v1.1.0-beta # subir tag
 git show v1.1.0-beta        # ver información del tag
 
 # Gestión de ramas
-git branch -d dev            # eliminar rama local
-git push origin --delete dev # eliminar rama remota
+git branch -d feature/new-feature-1            # eliminar rama local
+git push origin --delete feature/new-feature-1 # eliminar rama remota
 ```
 
 ---
@@ -570,9 +570,9 @@ git push origin --delete dev # eliminar rama remota
 - [ ] Al menos **2 commits** en `main` (uno con **staging
       selectivo**).
 - [ ] Historial revisado con comandos Git y en GitHub.
-- [ ] Rama `dev` creada, publicada y PR creado.
+- [ ] Rama `feature/new-feature-1` creada, publicada y PR creado.
 - [ ] **Branch protection** en `main` con **1 aprobación** requerida.
-- [ ] PR aprobado, merge realizado y rama `dev` eliminada.
+- [ ] PR aprobado, merge realizado y rama `feature/new-feature-1` eliminada.
 - [ ] **Tag** `v1.1.0-beta` y **release** publicado.
 
 ---
@@ -615,9 +615,9 @@ git push origin --delete dev # eliminar rama remota
   ```
 - **No aparece "Compare & pull request"**: crea el PR manualmente:
   **Pull requests** → **New pull request** (base: `main`, compare:
-  `dev`) o usa GitHub CLI:
+  `develop`) o usa GitHub CLI:
   ```bash
-  gh pr create --base main --head dev
+  gh pr create --base main --head develop
   ```
 - **No puedo commitear en `main`**: es lo esperado si la protección
   está activa; usa una rama y PR.
