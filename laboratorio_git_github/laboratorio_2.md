@@ -417,7 +417,7 @@ Usaremos **eShopOnWeb**
     ```bash
     git add src/Web/Program.cs
     git commit -m "feat(web): test my first PR - Closes #1"
-    git push origin dev
+    git push origin feature/new-feature-1
     ```
 
 3.  GitHub mostrará un banner "Compare & pull request". Clic en **Create
