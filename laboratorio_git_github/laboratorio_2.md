@@ -307,16 +307,16 @@ Usaremos **eShopOnWeb**
 2.  Crea y cambia a una nueva rama llamada `dev`:
 
     ```bash
-    git checkout -b devevelop
+    git checkout -b develop
     ```
 
     O alternativamente (Git 2.23+):
 
     ```bash
-    git switch -c devevelop
+    git switch -c develop
     ```
 
-3.  Verifica que estás en la rama `devevelop`:
+3.  Verifica que estás en la rama `develop`:
 
     ```bash
     git branch
@@ -324,13 +324,13 @@ Usaremos **eShopOnWeb**
 
 ### Tarea 2: Publicar y gestionar ramas
 
-1.  Publica la rama `devevelop` en GitHub:
+1.  Publica la rama `develop` en GitHub:
 
     ```bash
-    git push -u origin devevelop
+    git push -u origin develop
     ```
 
-    El flag `-u` establece `origin/devevelop` como rama upstream para futuros push/pull.
+    El flag `-u` establece `origin/develop` como rama upstream para futuros push/pull.
 
 2.  Verifica las ramas locales y remotas:
 
@@ -346,7 +346,7 @@ Usaremos **eShopOnWeb**
     ```
 
 3.  En GitHub, ve a **Branches** (pestaña del repo) y verifica que
-    exista `devevelop`.
+    exista `develop`.
 
 ### Tarea 3: Definir **Branch Protection Rules** (políticas sobre `main`)
 
@@ -401,7 +401,7 @@ Usaremos **eShopOnWeb**
 2.  Cambia a rama **dev**:
 
     ```bash
-    git checkout devevelop
+    git checkout develop
     ```
 
     Edita `src/Web/Program.cs` y agrega:
