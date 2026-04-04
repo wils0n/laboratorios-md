@@ -360,7 +360,9 @@ Usaremos **eShopOnWeb**
     - (Opcional) **Require linear history**
     - (Opcional) **Require status checks to pass** (si deseas, agrega
       checks de Actions más adelante)
-4.  Guarda con **Create** / **Save changes**.
+4. Click en "Add target" → seleccionar Include by pattern → escribir main
+![Import](images/branch_protectec_target.png)
+5.  Guarda con **Create** / **Save changes**.
 
 > GitHub no exige "issue vinculado" de forma nativa. Simularemos el
 > control con una **Issue** y el texto **`Closes #<número>`** en el PR
