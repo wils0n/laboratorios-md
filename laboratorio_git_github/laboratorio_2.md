@@ -361,7 +361,7 @@ Usaremos **eShopOnWeb**
     - (Opcional) **Require status checks to pass** (si deseas, agrega
       checks de Actions más adelante)
 4. Click en "Add target" → seleccionar Include by pattern → escribir main
-![Import](images/branch_protectec_target.png)
+![Import](images/branch_protected_target.png)
 5.  Guarda con **Create** / **Save changes**.
 
 > GitHub no exige "issue vinculado" de forma nativa. Simularemos el
