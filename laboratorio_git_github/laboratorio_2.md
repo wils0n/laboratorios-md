@@ -400,7 +400,7 @@ Usaremos **eShopOnWeb**
 1.  En GitHub, pestaña **Issues** → **New issue**.
     - **Title:** `Testing my first PR`\
     - **Submit new issue** (anota el número, p. ej. `#1`).
-2.  Cambia a rama **dev**:
+2.  Cambia a rama **feature/new-feature-1** que nace de la rama develop:
 
     ```bash
     git checkout develop
