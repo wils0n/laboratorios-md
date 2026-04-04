@@ -505,16 +505,6 @@ Usaremos **eShopOnWeb**
 
 ---
 
-## (Opcional) Ejercicio 6: Quitar temporalmente la protección de `main`
-
-Si vas a continuar con otros labs que requieren commits directos a
-`main`: 1. **Settings** → **Branches** → regla de `main` → **Edit**. 2.
-Desactiva **Require a pull request before merging** y **Require
-approvals**.\
-3. **Save changes**.
-
----
-
 ## Comandos útiles de Git (referencia rápida)
 
 ```bash

@@ -1,2 +1,21 @@
 *.DS_Store
-laboratorios_calificados/*
+
+# Archivos específicos no publicados
+laboratorio_git_github/laboratorio_2_2.md
+
+# Labs no publicados aún
+laboratorio_AI_assistants/
+laboratorio_IaC/
+laboratorio_aws/
+laboratorio_azure_devops/
+laboratorio_azure_pipelines/
+laboratorio_docker/
+laboratorio_docker_compose/
+laboratorio_github_actions/
+laboratorio_gitlab/
+laboratorio_kubernetes/
+laboratorio_mlops/
+laboratorios_calificados/
+laboratorios_devsecados/
+laboratorios_devsecops/
+terminal/
