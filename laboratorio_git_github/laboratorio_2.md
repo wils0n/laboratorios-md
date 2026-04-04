@@ -427,7 +427,7 @@ Usaremos **eShopOnWeb**
 
 4.  En la **descripción del PR**, escribe `Closes #1` para **vincular**
     la Issue.
-5.  Crea el PR contra `main`.
+5.  Crea el PR contra `develop` y luego crear PR contra `main`.
 6.  En la pestaña **Files changed**, revisa el diff. Añade comentarios
     si deseas.
 7.  En la pestaña **Conversation**, **Approve** (si eres revisor) y
