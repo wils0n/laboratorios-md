@@ -395,7 +395,7 @@ Usaremos **eShopOnWeb**
     git reset --hard HEAD~1
     ```
 
-### Tarea 5: Crear una **Issue**, hacer cambio en `dev` y abrir PR
+### Tarea 5: Crear una **Issue**, hacer cambio en y abrir PR siguiendo GitFlow
 
 1.  En GitHub, pestaña **Issues** → **New issue**.
     - **Title:** `Testing my first PR`\
@@ -403,7 +403,7 @@ Usaremos **eShopOnWeb**
 2.  Cambia a rama **feature/new-feature-1** que nace de la rama develop:
 
     ```bash
-    git checkout develop
+    git checkout feature/new-feature-1 
     ```
 
     Edita `src/Web/Program.cs` y agrega:
@@ -444,13 +444,13 @@ Usaremos **eShopOnWeb**
     git pull origin main
     ```
 
-    También puedes eliminar la rama local `dev`:
+    También puedes eliminar la rama local `feature/new-feature-1`:
 
     ```bash
-    git branch -d dev
+    git branch -d feature/new-feature-1
     ```
 
-> Al hacer merge, la Issue `#1` se cierra automáticamente por el
+> Al hacer merge a `main`, la Issue `#1` se cierra automáticamente por el
 > `Closes #1`.
 
 ---
