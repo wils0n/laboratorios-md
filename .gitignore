@@ -1,8 +1,4 @@
 *.DS_Store
-
-# Archivos específicos no publicados
-laboratorio_git_github/laboratorio_2_2.md
-
 # Labs no publicados aún
 laboratorio_AI_assistants/
 laboratorio_IaC/
@@ -18,4 +14,5 @@ laboratorio_mlops/
 laboratorios_calificados/
 laboratorios_devsecados/
 laboratorios_devsecops/
-terminal/
+terminal/laboratorio_3_1.md
+terminal/laboratorio_3_2.md
