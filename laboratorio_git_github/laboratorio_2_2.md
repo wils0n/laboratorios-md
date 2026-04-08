@@ -277,12 +277,11 @@ npm i dotenv
      });
    });
    ```
-2. Realiza tu PR a main de feature/init-config:
 
 ### Tarea 2: Probar el feature flag
 
 1. Con el flag **desactivado** (false) en LaunchDarkly:
-
+   - node server.mjs
    - Visita [http://localhost:3000](http://localhost:3000)
    - Deberías ver: "Feature flag is OFF - Original menu"
 
@@ -315,7 +314,7 @@ npm i dotenv
 
 ## Ejercicio 3: Configurar Galaxy Marketplace con feature flags
 
-### Tarea 1: Clonar y configurar Galaxy Marketplace
+### Tarea 1: Importar/Fork, clonar y configurar Galaxy Marketplace
 
 1. En una nueva terminal, clona el repositorio de Galaxy Marketplace:
 
@@ -340,9 +339,8 @@ npm i dotenv
 4. Edita el archivo `.env` con las mismas claves de LaunchDarkly:
 
    ```bash
-   # Backend SDK Key (para server-node/server.mjs)
-   LD_SDK_KEY=sdk-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-   LD_EVENT_KEY=tbd-lab
+   NEXT_PUBLIC_LD_CLIENT_KEY='<INSERT CLIENT-SIDE ID HERE>'
+   LD_SDK_KEY='<INSERT SDK KEY HERE>'
 
    ```
 
@@ -356,10 +354,10 @@ npm i dotenv
 
 ### Tarea 2: Implementar feature flag en frontend (marketplace.tsx)
 
-1. Revisa el código en `pages/marketplace.tsx` para entender la implementación:
+1. Revisa el código en `pages/marketplace.tsx` y copia el contenido de https://gist.github.com/wils0n/773d9eaa40a0597bba22061644dab795:
 
    ```tsx
-   // archivo completo en: https://gist.github.com/wils0n/773d9eaa40a0597bba22061644dab795
+   //Contenido importante donde está la lógica de feature flag
 
    import { useFlags, useLDClient } from "launchdarkly-react-client-sdk";
 
@@ -402,6 +400,8 @@ npm i dotenv
 
    - Los badges del menú NO deberían aparecer en la página
 
+<img src="../assets/badges_chips_menu.png" width="500px" />
+
 2. **Activa** el flag `feat-new-menu` en LaunchDarkly:
 
    - Refresca la página
@@ -410,13 +410,16 @@ npm i dotenv
 3. Commit de la configuración:
 
    ```bash
-   git add .env
+   git checkout main
+   git pull origin main
+   git checkout -b feature/enabled-feature-flag
+   git add .
    git commit -m "feat(config): configure LaunchDarkly for Galaxy Marketplace
 
    - Add SDK keys for frontend and backend integration
    - Enable feat-new-menu flag in marketplace
    - Ready for A/B testing and experiments"
-   git push origin main
+   git push origin feature/enabled-feature-flag
    ```
 
 ---
@@ -424,11 +427,13 @@ npm i dotenv
 ## Comandos útiles para TBD con LaunchDarkly (referencia rápida)
 
 ```bash
-# Flujo básico TBD
-git pull origin main         # Sincronizar frecuentemente
+# Flujo básico Trunk-Based Development (TBD)
+git pull origin main                        # Sincronizar antes de empezar
+git checkout -b feat/small-change           # Rama de vida corta (1-2 días máx)
 git add .
 git commit -m "feat(scope): small incremental change"
-git push origin main         # Push inmediato
+git push origin feat/small-change           # Push y abrir PR inmediatamente
+# PR → merge a main el mismo día o al día siguiente
 
 # Conventional commits ejemplos
 git commit -m "feat(auth): add OAuth2 login support"
@@ -506,15 +511,16 @@ git commit -m "test(experiment): record experiment results"
 ### 🔄 Flujo TBD con LaunchDarkly:
 
 1. `git pull origin main` (sincronizar)
-2. Hacer cambio pequeño con feature flag
-3. `git add` + `git commit` con conventional commit
-4. `git push origin main` (inmediatamente)
-5. Verificar CI pasa
-6. Configurar experimento en LaunchDarkly
-7. Habilitar flag para % de usuarios
-8. Monitorear métricas y resultados
-9. Rollout gradual o rollback según resultados
-10. Repetir
+2. `git checkout -b feat/descripcion-corta` (rama de vida corta)
+3. Hacer cambio pequeño con feature flag
+4. `git add` + `git commit` con conventional commit
+5. `git push origin feat/descripcion-corta` + abrir PR
+6. Verificar CI pasa → merge a main
+7. Configurar experimento en LaunchDarkly
+8. Habilitar flag para % de usuarios
+9. Monitorear métricas y resultados
+10. Rollout gradual o rollback según resultados
+11. Repetir
 
 ---
 
@@ -523,8 +529,8 @@ git commit -m "test(experiment): record experiment results"
 | Aspecto                   | GitHub Flow              | TBD + LaunchDarkly                     |
 | ------------------------- | ------------------------ | -------------------------------------- |
 | **Ramas**                 | Feature branches largas  | Solo main + ramas muy cortas           |
-| **Pull Requests**         | Obligatorios             | Opcionales, solo para cambios grandes  |
-| **Frecuencia de commits** | Al final de feature      | Múltiples veces al día                 |
+| **Pull Requests**         | Obligatorios             | Recomendados, se mergean el mismo día  |
+| **Frecuencia de commits** | Durante la feature (merge al completar) | Múltiples veces al día    |
 | **Feature toggles**       | No necesarios            | Esenciales con plataforma externa      |
 | **Tiempo de integración** | Al final del desarrollo  | Continuo durante desarrollo            |
 | **Conflictos**            | Más probables            | Minimizados por integración frecuente  |
@@ -536,7 +542,7 @@ git commit -m "test(experiment): record experiment results"
 
 ## Solución de problemas frecuentes
 
-- **"No puedo hacer push a main"**: Verifica permisos del repositorio
+- **"No puedo hacer push a main"**: En TBD, main está protegido — crea una rama feature con `git checkout -b feat/nombre` y abre un PR
 - **"LaunchDarkly no conecta"**: Verifica SDK keys en archivo .env
 - **"Feature flag no funciona"**: Verifica que el flag esté activado en LaunchDarkly
 - **"Conventional commit inválido"**: Revisa el formato: `type(scope): description`
