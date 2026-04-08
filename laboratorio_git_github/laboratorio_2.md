@@ -361,7 +361,7 @@ Usaremos **eShopOnWeb**
     - (Opcional) **Require status checks to pass** (si deseas, agrega
       checks de Actions más adelante)
 4. Click en "Add target" → seleccionar Include by pattern → escribir main
-<img src="images/branch_protected_target.png" width="300"/>
+<img src="images/badges_chips_menu.png" width="700"/>
 5.  Guarda con **Create** / **Save changes**.
 
 > GitHub no exige "issue vinculado" de forma nativa. Simularemos el

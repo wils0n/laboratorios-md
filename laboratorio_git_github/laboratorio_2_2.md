@@ -400,7 +400,7 @@ npm i dotenv
 
    - Los badges del menú NO deberían aparecer en la página
 
-<img src="../assets/badges_chips_menu.png" width="500px" />
+<img src="images/badges_chips_menu.png" width="500"/>
 
 2. **Activa** el flag `feat-new-menu` en LaunchDarkly:
 
