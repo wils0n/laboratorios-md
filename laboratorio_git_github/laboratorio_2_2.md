@@ -210,7 +210,7 @@ npm i dotenv
 4. Realiza tu primer commit con TBD:
 
    ```bash
-   git checkout feature/init-config
+   git checkout -b feature/init-config
    git add .
    git commit -m "feat(config): configure LaunchDarkly integration
 
