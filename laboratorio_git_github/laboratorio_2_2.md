@@ -1,4 +1,4 @@
-# Lab: Trunk-Based Development con Feature Flags \*\*
+# Lab: Trunk-Based Development con Feature Flags
 
 **Duración estimada:** 45--60 min\
 **Nivel:** Intermedio\
@@ -147,7 +147,7 @@ LaunchDarkly nos proporciona todas estas capacidades profesionales.
 
 ### Tarea 2: Configurar servidor Node.js con feature flags
 
-1. Clona el repositorio del servidor básico:
+1. Importa o realiza un fork del repositorio:
 
    ```bash
    git clone https://github.com/wils0n/server-nodejs-ff.git
@@ -192,7 +192,7 @@ npm i dotenv
 
 ### Tarea 3: Crear tu primer feature flag
 
-1. En tu dashboard de LaunchDarkly, ve a **Feature flags** → **Create flag**:
+1. En tu dashboard de LaunchDarkly, ve a **release → Feature flags** → **Create flag**:
 
    - **Name**: New Menu Features
    - **Key**: `feat-new-menu`
@@ -210,15 +210,16 @@ npm i dotenv
 4. Realiza tu primer commit con TBD:
 
    ```bash
-   git add .env
+   git checkout feature/init-config
+   git add .
    git commit -m "feat(config): configure LaunchDarkly integration
 
    - Add SDK keys for backend feature flags
    - Enable feat-new-menu flag evaluation
    - Ready for trunk-based development workflow"
-   git push origin main
+   git push origin feature/init-config
    ```
-
+5. Realiza tu primer PR a main de feature/init-config a main:
 ---
 
 ## Ejercicio 2: Implementar feature flag en el servidor
@@ -276,6 +277,7 @@ npm i dotenv
      });
    });
    ```
+2. Realiza tu PR a main de feature/init-config:
 
 ### Tarea 2: Probar el feature flag
 
@@ -297,13 +299,16 @@ npm i dotenv
 4. Commit del test:
 
    ```bash
+   git checkout main
+   git pull origin main
+   git checkout feature/enabled-feature-flag
    git add server.mjs
    git commit -m "test(flag): validate feat-new-menu flag behavior
 
    - Confirm flag evaluation works correctly
    - Test both ON and OFF states
    - LaunchDarkly integration functioning properly"
-   git push origin main
+   git push origin feature/enabled-feature-flag
    ```
 
 ---
