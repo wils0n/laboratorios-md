@@ -300,7 +300,7 @@ npm i dotenv
    ```bash
    git checkout main
    git pull origin main
-   git checkout feature/enabled-feature-flag
+   git checkout -b feature/enabled-feature-flag
    git add server.mjs
    git commit -m "test(flag): validate feat-new-menu flag behavior
 
