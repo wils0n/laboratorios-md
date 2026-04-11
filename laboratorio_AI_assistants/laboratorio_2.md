@@ -1,0 +1,226 @@
+# Laboratorio: Creando tus propios Skills en Claude Code
+
+**Duración estimada:** 30–45 min  
+**Nivel:** Intermedio  
+**Objetivo:** Aprender a crear, instalar y mejorar skills personalizados para Claude Code
+
+---
+
+## ¿Qué es un Skill?
+
+Un skill es un archivo markdown (`SKILL.md`) que se carga automáticamente en el contexto de Claude Code cuando lo necesitas. Contiene frontmatter YAML con metadatos y las instrucciones que el agente debe seguir.
+
+**Estructura básica de un skill:**
+
+```
+~/.claude/skills/
+└── nombre-del-skill/
+    └── SKILL.md
+```
+
+**Anatomía del archivo SKILL.md:**
+
+```markdown
+---
+name: nombre-del-skill
+description: Descripción clara que define cuándo se activa este skill
+---
+
+## Instrucciones
+
+Aquí van las instrucciones para el agente...
+```
+
+---
+
+## ¿Cuándo usar un Skill?
+
+**Buenos candidatos para un skill:**
+- Mensajes de commit con formato consistente
+- Descripciones de Pull Requests
+- Code reviews estandarizados
+- Entradas de changelog
+
+**Malos candidatos para un skill:**
+- Solicitudes abiertas como "ayúdame a pensar esto"
+- Tareas que requieren mucho contexto variable
+
+---
+
+## Ejercicio 1: Crear la estructura del skill
+
+Crea el directorio e instala tu primer skill:
+
+```bash
+mkdir -p ~/.claude/skills/commit-message-writer
+touch ~/.claude/skills/commit-message-writer/SKILL.md
+```
+
+---
+
+## Ejercicio 2: Escribir el frontmatter y la descripción
+
+El campo `description` es **crítico**: el agente decide si cargar o no el skill basándose únicamente en este campo.
+
+**Descripción débil (evitar):**
+```yaml
+---
+name: commit-message-writer
+description: Genera mensajes de commit
+---
+```
+
+**Descripción efectiva (usar):**
+```yaml
+---
+name: commit-message-writer
+description: >
+  Genera mensajes de commit con formato Conventional Commits.
+  Úsame cuando quieras escribir un commit, hacer commit de tus cambios,
+  o resumir tu diff staged. Produce una línea de asunto, cuerpo opcional
+  y footer. Se activa con frases como "escribe un mensaje de commit",
+  "commitea mis cambios" o "resume mi diff staged".
+---
+```
+
+**Reglas para una buena descripción:**
+1. Especifica el tipo de output (ej: "una línea de asunto + cuerpo")
+2. Lista frases de activación explícitas
+3. Sé ligeramente imperativo — no esperes que el usuario adivine cómo invocarte
+
+---
+
+## Ejercicio 3: Escribir las instrucciones del skill
+
+Crea el archivo `~/.claude/skills/commit-message-writer/SKILL.md` con el siguiente contenido:
+
+```markdown
+---
+name: commit-message-writer
+description: >
+  Genera mensajes de commit con formato Conventional Commits.
+  Úsame cuando quieras escribir un commit, hacer commit de tus cambios,
+  o resumir tu diff staged. Se activa con frases como "escribe un mensaje
+  de commit", "commitea mis cambios" o "resume mi diff staged".
+---
+
+## Formato de output
+
+Usa la especificación Conventional Commits:
+
+
+type(scope): descripción corta
+
+[cuerpo opcional]
+
+[footer opcional]
+```
+
+## Tipos permitidos
+```
+- `feat` — nueva funcionalidad
+- `fix` — corrección de bug
+- `docs` — cambios en documentación
+- `refactor` — refactorización sin cambio de comportamiento
+- `test` — agregar o corregir tests
+- `chore` — tareas de mantenimiento
+
+## Reglas
+
+1. La descripción corta debe estar en modo imperativo (ej: "add", no "added")
+2. Máximo 72 caracteres en la primera línea
+3. Genera el output directamente, sin hacer preguntas
+4. Nunca uses lenguaje vago como "update stuff" o "fix things"
+5. Si hay cambios en archivos no relacionados, agrupa por tipo de cambio
+```
+
+---
+
+## Ejercicio 4: Probar el skill
+
+Una vez instalado, puedes invocar el skill de dos formas:
+
+**Invocación directa:**
+```
+/commit-message-writer
+```
+
+**Lenguaje natural:**
+```
+escribe un mensaje de commit para mis cambios staged
+commitea mis cambios
+resume mi diff staged
+```
+
+**Casos de prueba para validar:**
+
+| Escenario | Resultado esperado |
+|---|---|
+| Sin cambios staged | El skill indica que no hay nada staged |
+| Cambios en múltiples archivos no relacionados | Agrupa o separa por tipo |
+| Distintas formas de pedir el commit | El skill se activa correctamente |
+
+---
+
+## Ejercicio 5: Mejorar el skill con el tiempo
+
+Los skills se refinan iterativamente. Estos son los problemas más comunes y cómo resolverlos:
+
+### Problema: Undertriggering (el skill no se activa)
+
+El agente no reconoce que debe usar el skill.
+
+**Solución:** Agrega más frases de activación al campo `description`:
+
+```yaml
+description: >
+  ... Se activa también con "haz commit", "crea un commit message",
+  "genera el mensaje para git commit"...
+```
+
+### Problema: Format drift (el output no respeta el formato)
+
+El agente produce output con estructura inconsistente.
+
+**Solución:** Agrega contraejemplos explícitos en las instrucciones:
+
+```markdown
+## Ejemplos
+
+Correcto:
+feat(auth): add JWT token refresh endpoint
+
+Incorrecto:
+- "Updated the auth stuff" (vago)
+- "feat: added new feature for authentication" (tiempo pasado, sin scope)
+```
+
+### Problema: Scope creep (el skill hace demasiado)
+
+El skill intenta resolver múltiples problemas y se vuelve confuso.
+
+**Solución:** Divide en skills separados. Un skill = una responsabilidad.
+
+---
+
+## Compatibilidad entre plataformas
+
+El formato `SKILL.md` es consistente entre diferentes agentes de IA. Solo cambia la ruta de instalación:
+
+| Herramienta | Directorio de skills |
+|---|---|
+| Claude Code | `~/.claude/skills/` |
+| GitHub Copilot | `~/.copilot/skills/` |
+| Cursor | `~/.cursor/skills/` |
+| Gemini CLI | `~/.gemini/skills/` |
+
+Esto significa que puedes escribir un skill una vez y reutilizarlo en múltiples herramientas.
+
+---
+
+## Resumen: Propiedades de un skill efectivo
+
+1. **Encapsula un workflow repetible** — no tareas únicas o muy variables
+2. **Tiene un trigger claro y específico** — la descripción es la clave
+3. **Produce un output de formato consistente** — define estructura, campos y límites
+4. **Genera output directamente** — sin hacer preguntas innecesarias al usuario

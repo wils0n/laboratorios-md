@@ -5,8 +5,12 @@
 **Objetivo:** Realizar pruebas unitarias a través de asistente IA Copilot
 
 ---
+## Prerrequisito:
+- Realizar un fork de: https://github.com/wils0n/lab-github-copilot-unit-test/tree/main
+- Copiar los archivos Calculadora.py, math_utils.py, weather_service.py de a este repositorio desde https://github.com/wils0n/laboratorios-md/tree/main/laboratorio_AI_assistants/files
 
-## Ejercicio 1: Configuración global de tests con @workspace /setupTests
+
+## Ejercicio 1: Configuración global de tests con #codebase /setupTests
 
 Las anotaciones como `#codebase /setupTests` se utilizan para indicar archivos o bloques de código que preparan el entorno de pruebas, por ejemplo, Te preguntará si deseas utilizar pytest o unittest:
 
@@ -16,12 +20,12 @@ Elegiremos pytest
 
 ---
 
-## Ejercicio 2: Generar Pruebas unitarias de una calculadora con @workspace /test
+## Ejercicio 2: Generar Pruebas unitarias de una calculadora con #codebase /test
 
-Si abrimos el archivo Calculator.py y en el prompt usas `@workspace /test`, generará los unit test para el archivo activo. Por ejemplo, para una calculadora te generará algo como:
+Si abrimos el archivo Calculator.py y en el prompt usas `#codebase /test`, generará los unit test para el archivo activo. Por ejemplo, para una calculadora te generará algo como:
 
 ```python
-# @workspace /test
+# #codebase /test
 import pytest
 from calculator import add, subtract, multiply, divide, power, factorial
 
@@ -189,6 +193,6 @@ Has aprendido a:
 - Configurar y usar `pytest`.
 - Simular dependencias externas con `unittest.mock`.
 - Escribir pruebas unitarias efectivas para código que depende de servicios externos.
-- Entender el propósito de las anotaciones `@workspace /test` y `@workspace /setupTests` en la organización y automatización de pruebas.
+- Entender el propósito de las anotaciones `#codebase /test` y `#codebase /setupTests` en la organización y automatización de pruebas.
 
 ¡Buen trabajo!
