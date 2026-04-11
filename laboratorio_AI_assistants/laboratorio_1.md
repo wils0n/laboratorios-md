@@ -8,7 +8,7 @@
 
 ## Ejercicio 1: Configuración global de tests con @workspace /setupTests
 
-Las anotaciones como `@workspace /setupTests` se utilizan para indicar archivos o bloques de código que preparan el entorno de pruebas, por ejemplo, Te preguntará si deseas utilizar pytest o unittest:
+Las anotaciones como `#codebase /setupTests` se utilizan para indicar archivos o bloques de código que preparan el entorno de pruebas, por ejemplo, Te preguntará si deseas utilizar pytest o unittest:
 
 ```python
 Elegiremos pytest
