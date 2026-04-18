@@ -1,7 +1,6 @@
 *.DS_Store
 # Labs no publicados aún
 laboratorio_IaC/
-laboratorio_aws/
 laboratorio_azure_devops/
 laboratorio_azure_pipelines/
 laboratorio_docker/
