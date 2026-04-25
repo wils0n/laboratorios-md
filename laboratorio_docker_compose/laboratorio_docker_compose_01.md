@@ -107,6 +107,105 @@ echo "pg_password.txt" >> .gitignore
 
 ---
 
+## 3.1 ¿Por qué dos archivos con la misma contraseña?
+
+`pg_password.txt` y `.env.dev` contienen el mismo valor pero los lee un consumidor distinto:
+
+| Archivo | Lo lee | Para qué |
+|---|---|---|
+| `pg_password.txt` | **PostgreSQL** vía `POSTGRES_PASSWORD_FILE` | Inicializar la contraseña del usuario en la DB |
+| `.env.dev` | **Flask** vía `os.environ.get('DB_PASSWORD')` | Autenticarse contra la DB como cliente |
+
+Son dos lados del mismo handshake: PostgreSQL establece su contraseña con el secreto; Flask usa esa misma contraseña para conectarse.
+
+### Forma A — env_file + secret (la de este lab)
+
+Dos archivos, cada servicio lee del suyo:
+
+```
+pg_password.txt  →  secret  →  postgres (POSTGRES_PASSWORD_FILE)
+.env.dev         →  env_file →  flask   (DB_PASSWORD env var)
+```
+
+`compose.yaml`:
+```yaml
+services:
+  flask:
+    env_file:
+      - .env.dev              # Flask lee DB_PASSWORD desde aquí
+    secrets:
+      - pg_password           # no necesario en flask con esta forma
+
+  postgres:
+    environment:
+      - POSTGRES_PASSWORD_FILE=/run/secrets/pg_password
+    secrets:
+      - pg_password           # Postgres lee la contraseña del archivo montado
+
+secrets:
+  pg_password:
+    file: ./pg_password.txt
+```
+
+`app.py` lee la variable de entorno:
+```python
+db_password = os.environ.get('DB_PASSWORD')
+```
+
+**Cuándo usarla:** entornos de desarrollo donde ya usas `env_file` para otras variables. Más simple de entender.
+
+---
+
+### Forma B — solo secret (recomendada en producción)
+
+Un solo archivo `pg_password.txt`, ambos servicios lo consumen como secreto:
+
+```
+pg_password.txt  →  secret  →  postgres (POSTGRES_PASSWORD_FILE)
+                 →  secret  →  flask    (lee el archivo montado)
+```
+
+`compose.yaml`:
+```yaml
+services:
+  flask:
+    secrets:
+      - pg_password           # secreto montado en /run/secrets/pg_password
+
+  postgres:
+    environment:
+      - POSTGRES_PASSWORD_FILE=/run/secrets/pg_password
+    secrets:
+      - pg_password
+
+secrets:
+  pg_password:
+    file: ./pg_password.txt
+```
+
+`app.py` lee directamente del archivo del secreto:
+```python
+db_password = open('/run/secrets/pg_password').read().strip()
+```
+
+**Cuándo usarla:** producción o cuando quieres una sola fuente de verdad. Elimina `.env.dev` y no hay riesgo de que los dos archivos queden desincronizados.
+
+---
+
+### Comparativa
+
+| Aspecto | Forma A (env_file + secret) | Forma B (solo secret) |
+|---|---|---|
+| Archivos de credenciales | 2 (`pg_password.txt` + `.env.dev`) | 1 (`pg_password.txt`) |
+| Riesgo de desincronización | Sí (si cambias una y no la otra) | No |
+| Flask lee desde | Variable de entorno | Archivo montado |
+| Postgres lee desde | Archivo secreto | Archivo secreto |
+| Recomendado para | Desarrollo | Producción |
+
+> Este lab implementa la **Forma A** para mostrar ambos mecanismos (`env_file` y `secrets`) como conceptos separados. En un proyecto real usa la **Forma B**.
+
+---
+
 ## 4. Crear compose.yaml
 
 ```bash
