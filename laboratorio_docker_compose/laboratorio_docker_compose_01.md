@@ -651,4 +651,104 @@ docker compose build flask
 
 ---
 
+## Troubleshooting
+
+### Error: bind source path does not exist: `.../pg_password.txt`
+
+```
+Error response from daemon: invalid mount config for type "bind":
+bind source path does not exist: .../pg_password.txt
+```
+
+**Causa:** `pg_password.txt` está en `.gitignore` y no se versiona. Hay que crearlo manualmente en cada máquina o entorno nuevo.
+
+**Solución:**
+```bash
+echo "devops123" > pg_password.txt
+docker compose up -d
+```
+
+---
+
+### Error: port is already allocated (8080)
+
+```
+Bind for 0.0.0.0:8080 failed: port is already allocated
+```
+
+**Causa:** otro proceso o contenedor ya ocupa el puerto 8080 en el host.
+
+**Identificar qué ocupa el puerto:**
+```bash
+lsof -i :8080
+```
+
+**Opción A — matar el proceso:**
+```bash
+kill -9 <PID>
+docker compose up -d
+```
+
+**Opción B — eliminar un contenedor Docker anterior que usa ese puerto:**
+```bash
+docker ps -a                  # identificar el contenedor
+docker rm -f <nombre>
+docker compose up -d
+```
+
+**Opción C — cambiar el puerto en `compose.yaml`:**
+```yaml
+ports:
+  - "8081:5000"
+```
+```bash
+docker compose up -d
+curl localhost:8081/api/health
+```
+
+---
+
+### Flask arranca pero no conecta a PostgreSQL
+
+```
+psycopg.OperationalError: connection refused
+```
+
+**Causa:** Flask intentó conectarse antes de que Postgres estuviera listo (el `healthcheck` aún no pasó).
+
+**Verificar estado de los contenedores:**
+```bash
+docker compose ps
+docker compose logs postgres
+```
+
+**Solución:** espera a que `postgres` esté `healthy` y reinicia Flask:
+```bash
+docker compose restart flask
+```
+
+Si el problema persiste, verifica que las variables de entorno `DB_HOST`, `DB_USER`, `DB_PASSWORD` lleguen correctamente al contenedor:
+```bash
+docker compose exec flask env | grep DB_
+```
+
+---
+
+### Datos no persisten tras `docker compose down`
+
+**Causa:** se usó `docker compose down -v`, que elimina los volúmenes junto con los contenedores.
+
+**Solución:** usar siempre `docker compose down` sin `-v` para conservar datos:
+```bash
+docker compose down      # conserva postgres-data
+docker compose up -d
+```
+
+Para ver qué volúmenes existen:
+```bash
+docker volume ls | grep postgres
+```
+
+---
+
 ¡Felicidades! Tienes un stack Flask + PostgreSQL completamente orquestado con Docker Compose, con secretos, redes aisladas y persistencia de datos.
