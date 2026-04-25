@@ -183,7 +183,124 @@ networks:
 
 ---
 
-## 5. Actualizar app.py con integración PostgreSQL
+## 5. Conceptos: Redes en Docker Compose
+
+### ¿Qué es una red en Docker Compose?
+
+Por defecto, Docker Compose crea una sola red compartida donde todos los servicios pueden comunicarse entre sí. Sin embargo, exponer todos los servicios al mundo exterior es un riesgo de seguridad. Para este stack definimos **dos redes con responsabilidades distintas**:
+
+| Red | `internal` | Quién pertenece | Propósito |
+|---|---|---|---|
+| `public` | `false` (default) | `flask` | Permite que el host acceda al contenedor via port mapping |
+| `private` | `true` | `flask`, `postgres` | Comunicación interna entre servicios; sin salida a internet ni al host |
+
+### Red pública (`public`)
+
+- Es una red bridge normal de Docker.
+- El contenedor `flask` está conectado a ella y tiene el port mapping `8080:5000`, lo que permite que el navegador o `curl` desde el host lleguen a la app.
+- Si `postgres` estuviera en esta red, cualquiera podría conectarse al puerto 5432 desde fuera.
+
+### Red privada (`private` con `internal: true`)
+
+- `internal: true` le dice a Docker que **no cree una ruta de salida** hacia el exterior (ni al host, ni a internet).
+- Solo los contenedores conectados a esta red pueden hablar entre sí.
+- `postgres` vive únicamente en esta red: es invisible desde fuera del stack.
+- `flask` también está conectado a ella, por eso puede resolver el hostname `postgres` y abrir conexiones a la base de datos.
+
+### Diagrama de arquitectura
+
+```mermaid
+graph TD
+    subgraph HOST["Máquina host"]
+        Browser["Browser / curl"]
+    end
+
+    subgraph PUBLIC["Red: public (bridge)"]
+        Flask["flask\n:5000"]
+    end
+
+    subgraph PRIVATE["Red: private (internal: true)"]
+        Flask2["flask"]
+        Postgres["postgres\n:5432"]
+    end
+
+    subgraph STORAGE["Almacenamiento"]
+        Vol[("postgres-data\n(named volume)")]
+    end
+
+    Browser -- "puerto 8080 → 5000" --> Flask
+    Flask -. "mismo contenedor" .-> Flask2
+    Flask2 -- "TCP postgres:5432" --> Postgres
+    Postgres -- "monta en\n/var/lib/postgresql/data" --> Vol
+
+    style PRIVATE fill:#ffeeba,stroke:#f0ad4e
+    style PUBLIC fill:#d4edda,stroke:#28a745
+    style HOST fill:#cce5ff,stroke:#004085
+    style STORAGE fill:#f8d7da,stroke:#721c24
+```
+
+**Flujo de una petición `POST /items`:**
+1. `curl` en el host golpea `localhost:8080` → Docker redirige al puerto `5000` del contenedor `flask` (red `public`).
+2. `flask` procesa la petición y necesita guardar en DB → resuelve el hostname `postgres` dentro de la red `private`.
+3. `postgres` recibe la query, escribe en disco → los datos se guardan en el volumen `postgres-data`.
+4. El host **nunca** puede tocar directamente el puerto 5432 de `postgres` porque no hay ruta (red `private` con `internal: true`).
+
+---
+
+## 6. Conceptos: Volúmenes en Docker Compose
+
+### ¿Por qué se necesitan volúmenes?
+
+Los contenedores son **efímeros**: cuando se eliminan, todo lo que escribieron en su sistema de archivos interno desaparece. Para una base de datos esto es inaceptable.
+
+Un **volumen** es un directorio gestionado por Docker que existe **fuera del ciclo de vida del contenedor**. Los datos persisten aunque el contenedor se destruya y se recree.
+
+### Tipos de montaje en Docker
+
+| Tipo | Sintaxis en compose | Dónde vive | Uso típico |
+|---|---|---|---|
+| **Named volume** | `postgres-data:/var/lib/postgresql/data` | Gestionado por Docker (`/var/lib/docker/volumes/`) | Persistencia de DB, datos de producción |
+| **Bind mount** | `./config.yml:/config.yml` | Directorio real del host | Desarrollo, inyectar archivos de config |
+| **tmpfs** | `tmpfs: /tmp` | RAM del host | Datos temporales sensibles, caché |
+
+En este lab usamos un **named volume** para PostgreSQL:
+
+```yaml
+volumes:
+  postgres-data:          # Docker crea y gestiona este volumen
+
+services:
+  postgres:
+    volumes:
+      - postgres-data:/var/lib/postgresql/data   # monta el volumen en el path de datos de PG
+```
+
+### Comportamiento de `docker compose down`
+
+```bash
+docker compose down        # elimina contenedores — el volumen postgres-data SOBREVIVE
+docker compose down -v     # elimina contenedores Y el volumen — datos PERDIDOS
+docker compose up -d       # recrea contenedores — postgres-data se monta de nuevo con los datos
+```
+
+### Comandos útiles para volúmenes
+
+```bash
+# Listar volúmenes en el sistema
+docker volume ls
+
+# Ver detalles de un volumen (ubicación en disco, tamaño)
+docker volume inspect flask-docker-app_postgres-data
+
+# Eliminar volúmenes no usados
+docker volume prune
+```
+
+> El nombre del volumen en el host sigue el patrón `<directorio_proyecto>_<nombre_volumen>`, por ejemplo `flask-docker-app_postgres-data`.
+
+---
+
+## 7. Actualizar app.py con integración PostgreSQL
 
 ```bash
 vim app.py
@@ -271,7 +388,7 @@ if __name__ == '__main__':
 
 ---
 
-## 6. Levantar el stack
+## 8. Levantar el stack
 
 ### Construir y levantar en modo detached
 
@@ -295,7 +412,7 @@ docker compose logs -f
 
 ---
 
-## 7. Configurar la base de datos
+## 9. Configurar la base de datos
 
 Entra al contenedor de PostgreSQL y crea la tabla:
 
@@ -330,7 +447,7 @@ Sal de `psql`:
 
 ---
 
-## 8. Probar los endpoints
+## 10. Probar los endpoints
 
 ### Insertar items
 
@@ -369,7 +486,7 @@ curl localhost:8080/api/health
 
 ---
 
-## 9. Persistencia de datos
+## 11. Persistencia de datos
 
 Detén el stack y vuélvelo a levantar para verificar que los datos persisten en el volumen:
 
@@ -383,7 +500,7 @@ curl localhost:8080/items   # los items deben seguir ahí
 
 ---
 
-## 10. Comandos útiles de Docker Compose
+## 12. Comandos útiles de Docker Compose
 
 ```bash
 # Levantar stack (reconstruyendo imágenes)
