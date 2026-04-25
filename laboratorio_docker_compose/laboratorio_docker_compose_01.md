@@ -338,8 +338,6 @@ graph TD
     style STORAGE fill:#f8d7da,stroke:#721c24
 ```
 
-![Diagrama de redes Docker Compose](images/redes.png)
-
 **Flujo de una petición `POST /items`:**
 1. `curl` en el host golpea `localhost:8080` → Docker redirige al puerto `5000` del contenedor `flask` (red `public`).
 2. `flask` procesa la petición y necesita guardar en DB → resuelve el hostname `postgres` dentro de la red `private`.
