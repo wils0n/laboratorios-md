@@ -749,4 +749,43 @@ docker volume ls | grep postgres
 
 ---
 
+### Ver logs por servicio
+
+Cuando algo falla, revisar los logs de cada servicio por separado es más útil que ver todo junto.
+
+**Logs de todos los servicios (tiempo real):**
+```bash
+docker compose logs -f
+```
+
+**Logs solo de Flask:**
+```bash
+docker compose logs flask          # historial completo
+docker compose logs -f flask       # en tiempo real
+docker compose logs --tail=50 flask  # últimas 50 líneas
+```
+
+**Logs solo de PostgreSQL:**
+```bash
+docker compose logs postgres
+docker compose logs -f postgres
+docker compose logs --tail=50 postgres
+```
+
+**Logs desde un momento específico:**
+```bash
+docker compose logs --since=5m flask      # últimos 5 minutos
+docker compose logs --since=2024-01-01 postgres  # desde una fecha
+```
+
+**Ver timestamps en los logs:**
+```bash
+docker compose logs -t flask
+docker compose logs -t postgres
+```
+
+> **Tip:** combina flags: `docker compose logs -f --tail=100 flask` muestra las últimas 100 líneas y sigue en tiempo real.
+
+---
+
 ¡Felicidades! Tienes un stack Flask + PostgreSQL completamente orquestado con Docker Compose, con secretos, redes aisladas y persistencia de datos.
