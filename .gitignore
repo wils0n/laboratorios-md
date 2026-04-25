@@ -6,7 +6,9 @@ laboratorio_azure_pipelines/
 laboratorio_docker/Entregable_laboratorio6.1.md
 laboratorio_docker/lab-6.2-volumenes-docker-env.md
 laboratorio_docker/laboratorio_6_1_docker_flask.md
-laboratorio_docker_compose/
+laboratorio_docker_compose/laboratorio_7_1.md
+laboratorio_docker_compose/laboratorio_7_2.md
+laboratorio_docker_compose/tutorial-teoria-docker-compose-flask.md
 laboratorio_github_actions/
 laboratorio_gitlab/
 laboratorio_kubernetes/guia_*

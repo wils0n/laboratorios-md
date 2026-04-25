@@ -1,0 +1,436 @@
+# Guía: Docker Compose + PostgreSQL con Flask
+
+**Duración estimada:** 60–90 min  
+**Nivel:** Intermedio  
+**Prerrequisito:** Haber completado `laboratorio_docker_01.md` (imagen `flask-docker-app:1.0` construida y publicada en Docker Hub)
+
+---
+
+## Objetivos de aprendizaje
+
+- Migrar de `docker run` a Docker Compose
+- Integrar un servicio PostgreSQL en el stack
+- Gestionar credenciales con Docker secrets
+- Aislar servicios con redes internas
+- Conectar Flask a PostgreSQL con `psycopg` y connection pooling
+- Implementar endpoints CRUD contra la base de datos
+
+---
+
+## Requisitos del laboratorio
+
+- Docker y Docker Compose instalados
+- Imagen `flask-docker-app:1.0` construida localmente (del lab anterior)
+- Editor de texto (vim, VS Code, etc.)
+
+---
+
+## Estructura del proyecto
+
+Al finalizar este laboratorio tu directorio quedará así:
+
+```
+flask-docker-app/
+├── app.py
+├── requirements.txt
+├── Dockerfile
+├── .dockerignore
+├── .env.dev          ← nuevo
+├── pg_password.txt   ← nuevo (en .gitignore)
+└── compose.yaml      ← nuevo
+```
+
+---
+
+## 1. Preparar el proyecto base
+
+Entra al directorio del lab anterior:
+
+```bash
+cd flask-docker-app
+```
+
+---
+
+## 2. Actualizar dependencias
+
+Agrega el driver de PostgreSQL a `requirements.txt`:
+
+```bash
+vim requirements.txt
+```
+
+Contenido actualizado:
+
+```
+Flask==2.3.3
+gunicorn==21.2.0
+psycopg[binary,pool]==3.2.1
+```
+
+---
+
+## 3. Crear archivos de configuración y secretos
+
+### Archivo de variables de entorno (.env.dev)
+
+```bash
+vim .env.dev
+```
+
+Contenido:
+
+```env
+DB_PASSWORD=devops123
+```
+
+> **Importante:** Agrega `.env.dev` y `pg_password.txt` a tu `.gitignore` para no exponer credenciales.
+
+### Archivo de secreto para PostgreSQL (pg_password.txt)
+
+```bash
+vim pg_password.txt
+```
+
+Contenido:
+
+```
+devops123
+```
+
+### Actualizar .gitignore
+
+```bash
+echo ".env.dev" >> .gitignore
+echo "pg_password.txt" >> .gitignore
+```
+
+---
+
+## 4. Crear compose.yaml
+
+```bash
+vim compose.yaml
+```
+
+Contenido:
+
+```yaml
+services:
+  flask:
+    image: flask-docker-app:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:5000"
+    env_file:
+      - .env.dev
+    environment:
+      - APP_VERSION=2.0.0
+      - DB_HOST=postgres
+      - DB_DATABASE=mydb
+      - DB_USER=myuser
+    networks:
+      - public
+      - private
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:16.3
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=myuser
+      - POSTGRES_DB=mydb
+      - POSTGRES_PASSWORD_FILE=/run/secrets/pg_password
+    secrets:
+      - pg_password
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - private
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U myuser -d mydb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+secrets:
+  pg_password:
+    file: ./pg_password.txt
+
+volumes:
+  postgres-data:
+
+networks:
+  public:
+  private:
+    internal: true
+```
+
+**Puntos clave del compose.yaml:**
+
+| Configuración | Propósito |
+|---|---|
+| `depends_on` con `condition: service_healthy` | Flask espera que Postgres esté listo antes de arrancar |
+| `networks: private` en postgres | Postgres solo accesible desde servicios internos, no desde el host |
+| `POSTGRES_PASSWORD_FILE` | Postgres lee la contraseña del secreto montado, no de una variable de entorno |
+| `postgres-data` volume | Datos persistentes; sobreviven a `docker compose down` |
+
+---
+
+## 5. Actualizar app.py con integración PostgreSQL
+
+```bash
+vim app.py
+```
+
+Contenido completo:
+
+```python
+from flask import Flask, jsonify, render_template_string, request
+import os
+from psycopg_pool import ConnectionPool
+
+def db_connect():
+    url = (
+        f"host={os.environ.get('DB_HOST')} "
+        f"dbname={os.environ.get('DB_DATABASE')} "
+        f"user={os.environ.get('DB_USER')} "
+        f"password={os.environ.get('DB_PASSWORD')}"
+    )
+    pool = ConnectionPool(url)
+    pool.wait()
+    return pool
+
+pool = db_connect()
+
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    html = '''
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Flask Docker App</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 50px; }
+            .container { max-width: 600px; margin: 0 auto; }
+            h1 { color: #2196F3; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Flask + PostgreSQL</h1>
+            <p>Stack Flask + PostgreSQL corriendo con Docker Compose.</p>
+            <ul>
+                <li><a href="/api/health">Estado de la API</a></li>
+                <li><a href="/items">Listar items</a></li>
+            </ul>
+        </div>
+    </body>
+    </html>
+    '''
+    return render_template_string(html)
+
+@app.route('/api/health')
+def health():
+    return jsonify({"status": "healthy", "version": os.environ.get("APP_VERSION")})
+
+def save_item(priority, task):
+    with pool.connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                'INSERT INTO item (priority, task) VALUES (%s, %s)',
+                (priority, task)
+            )
+            conn.commit()
+
+def get_items():
+    with pool.connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute('SELECT item_id, priority, task FROM item')
+            return [{'id': r[0], 'priority': r[1], 'task': r[2]} for r in cur]
+
+@app.route('/items', methods=['GET', 'POST'])
+def items():
+    if request.method == 'POST':
+        body = request.get_json()
+        save_item(body['priority'], body['task'])
+        return {'message': 'item saved!'}, 201
+    return get_items(), 200
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=True)
+```
+
+---
+
+## 6. Levantar el stack
+
+### Construir y levantar en modo detached
+
+```bash
+docker compose up --build -d
+```
+
+### Verificar que ambos contenedores están corriendo
+
+```bash
+docker compose ps
+```
+
+Debes ver `flask` y `postgres` con estado `running`.
+
+### Ver logs en tiempo real
+
+```bash
+docker compose logs -f
+```
+
+---
+
+## 7. Configurar la base de datos
+
+Entra al contenedor de PostgreSQL y crea la tabla:
+
+```bash
+docker compose exec postgres psql -U myuser -d mydb
+```
+
+Dentro de `psql`, ejecuta:
+
+```sql
+CREATE TABLE item (
+  item_id serial PRIMARY KEY,
+  priority varchar(256),
+  task varchar(256)
+);
+```
+
+Crea el usuario de aplicación y otorga permisos:
+
+```sql
+CREATE USER myapp WITH PASSWORD 'devops123';
+GRANT ALL PRIVILEGES ON DATABASE mydb TO myapp;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO myapp;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO myapp;
+```
+
+Sal de `psql`:
+
+```sql
+\q
+```
+
+---
+
+## 8. Probar los endpoints
+
+### Insertar items
+
+```bash
+curl -H "Content-Type: application/json" \
+     -d '{"priority":"high","task":"doctor appointment"}' \
+     localhost:8080/items
+```
+
+```bash
+curl -H "Content-Type: application/json" \
+     -d '{"priority":"low","task":"buy dinner"}' \
+     localhost:8080/items
+```
+
+### Listar items
+
+```bash
+curl localhost:8080/items
+```
+
+Respuesta esperada:
+
+```json
+[
+  {"id": 1, "priority": "high", "task": "doctor appointment"},
+  {"id": 2, "priority": "low",  "task": "buy dinner"}
+]
+```
+
+### Verificar estado
+
+```bash
+curl localhost:8080/api/health
+```
+
+---
+
+## 9. Persistencia de datos
+
+Detén el stack y vuélvelo a levantar para verificar que los datos persisten en el volumen:
+
+```bash
+docker compose down
+docker compose up -d
+curl localhost:8080/items   # los items deben seguir ahí
+```
+
+> `docker compose down` detiene y elimina contenedores pero **no** el volumen `postgres-data`. Para eliminar datos usa `docker compose down -v`.
+
+---
+
+## 10. Comandos útiles de Docker Compose
+
+```bash
+# Levantar stack (reconstruyendo imágenes)
+docker compose up --build -d
+
+# Ver estado de servicios
+docker compose ps
+
+# Ver logs de un servicio
+docker compose logs flask
+docker compose logs postgres
+
+# Ejecutar comando en un servicio
+docker compose exec postgres psql -U myuser -d mydb
+
+# Detener stack (conserva volúmenes)
+docker compose down
+
+# Detener stack y eliminar volúmenes
+docker compose down -v
+
+# Reconstruir solo la imagen Flask
+docker compose build flask
+```
+
+---
+
+## Checklist de éxito
+
+- [ ] `compose.yaml` creado con servicios `flask` y `postgres`
+- [ ] Secreto `pg_password.txt` configurado correctamente
+- [ ] Stack levantado con `docker compose up --build -d`
+- [ ] Ambos contenedores en estado `running`
+- [ ] Tabla `item` creada en PostgreSQL
+- [ ] Inserción de items via `POST /items` exitosa
+- [ ] Listado de items via `GET /items` retorna datos correctos
+- [ ] Datos persisten tras `docker compose down` y nuevo `up`
+
+---
+
+## Consideraciones de seguridad
+
+- Nunca pongas contraseñas en `environment` directamente; usa `secrets` o `env_file` (fuera de git)
+- La red `private` con `internal: true` bloquea acceso externo a PostgreSQL
+- Usa `POSTGRES_PASSWORD_FILE` en lugar de `POSTGRES_PASSWORD` para no exponer la contraseña en variables de entorno del proceso
+- Agrega `pg_password.txt` y `.env.dev` al `.gitignore`
+
+---
+
+¡Felicidades! Tienes un stack Flask + PostgreSQL completamente orquestado con Docker Compose, con secretos, redes aisladas y persistencia de datos.
