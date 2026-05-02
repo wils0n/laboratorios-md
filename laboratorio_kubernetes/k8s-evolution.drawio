@@ -1,0 +1,746 @@
+<mxfile host="Electron" agent="draw.io" pages="11">
+  <diagram name="01 - Namespace" id="d01">
+    <mxGraphModel grid="0" pageWidth="1200" pageHeight="950">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="cl" value="☸ Kubernetes Cluster" style="rounded=1;fillColor=#f0f8ff;strokeColor=#1565c0;strokeWidth=3;fontSize=16;fontStyle=1;verticalAlign=top;arcSize=2;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="5" y="5" width="1190" height="940" as="geometry" />
+        </mxCell>
+        <mxCell id="cp" value="Control Plane — API Server | etcd | Scheduler | Controller Manager | CoreDNS" style="rounded=0;fillColor=#1a237e;strokeColor=#0d47a1;fontColor=#ffffff;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="15" y="15" width="1170" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="ns" value="Namespace: flask-app" style="rounded=1;fillColor=#e8eaf6;strokeColor=#43a047;strokeWidth=3;fontSize=15;fontStyle=3;verticalAlign=top;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="15" y="72" width="1170" height="865" as="geometry" />
+        </mxCell>
+        <mxCell id="desc" value="★ NUEVO — 01-namespace.yaml&#xa;&#xa;• Crea el namespace flask-app&#xa;• Todos los recursos del lab vivirán dentro&#xa;• Permite RBAC y cuotas separadas del resto del clúster&#xa;• Configurar como default: kubectl config set-context --current --namespace=flask-app" style="rounded=1;fillColor=#e8f5e9;strokeColor=#43a047;strokeWidth=2;fontSize=12;align=left;spacingLeft=10;verticalAlign=top;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="60" y="130" width="560" height="130" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="02 - Flask Deployment" id="d02">
+    <mxGraphModel dx="1557" dy="952" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="950" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="cl" parent="1" style="rounded=1;fillColor=#f0f8ff;strokeColor=#1565c0;strokeWidth=3;fontSize=16;fontStyle=1;verticalAlign=top;arcSize=2;whiteSpace=wrap;" value="☸ Kubernetes Cluster" vertex="1">
+          <mxGeometry height="940" width="1190" x="5" y="5" as="geometry" />
+        </mxCell>
+        <mxCell id="cp" parent="1" style="rounded=0;fillColor=#1a237e;strokeColor=#0d47a1;fontColor=#ffffff;fontSize=11;fontStyle=1;" value="Control Plane — API Server | etcd | Scheduler | Controller Manager | CoreDNS" vertex="1">
+          <mxGeometry height="48" width="1170" x="15" y="15" as="geometry" />
+        </mxCell>
+        <mxCell id="ns" parent="1" style="rounded=1;fillColor=#e8eaf6;strokeColor=#3949ab;strokeWidth=3;fontSize=15;fontStyle=3;verticalAlign=top;whiteSpace=wrap;" value="Namespace: flask-app" vertex="1">
+          <mxGeometry height="865" width="1170" x="15" y="72" as="geometry" />
+        </mxCell>
+        <mxCell id="fd" parent="1" style="rounded=1;strokeWidth=3;fontSize=14;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;" value="Deployment: flask-app" vertex="1">
+          <mxGeometry height="810" width="560" x="30" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="frs" parent="1" style="rounded=1;fillColor=#546e7a;strokeColor=#43a047;strokeWidth=3;fontColor=#ffffff;fontSize=12;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;" value="ReplicaSet (flask-app-xxxx)" vertex="1">
+          <mxGeometry height="720" width="520" x="50" y="155" as="geometry" />
+        </mxCell>
+        <mxCell id="fp1" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=3;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Flask Pod 1&#xa;flask-k8s-app:1.0&#xa;port 5000 | APP_ENV=dev" vertex="1">
+          <mxGeometry height="120" width="220" x="75" y="215" as="geometry" />
+        </mxCell>
+        <mxCell id="fp2" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=3;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Flask Pod 2&#xa;flask-k8s-app:1.0&#xa;port 5000 | APP_ENV=dev" vertex="1">
+          <mxGeometry height="120" width="220" x="75" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="fp3" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=3;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Flask Pod 3&#xa;flask-k8s-app:1.0&#xa;port 5000 | APP_ENV=dev" vertex="1">
+          <mxGeometry height="120" width="220" x="75" y="525" as="geometry" />
+        </mxCell>
+        <mxCell id="pr" parent="1" style="rounded=1;fillColor=#37474f;strokeColor=#263238;fontColor=#cfd8dc;fontSize=10;align=left;spacingLeft=6;whiteSpace=wrap;" value="livenessProbe: GET /health&#xa;readinessProbe: GET /health&#xa;resources: 128Mi / 100m cpu" vertex="1">
+          <mxGeometry height="80" width="210" x="320" y="215" as="geometry" />
+        </mxCell>
+        <mxCell id="desc" parent="1" style="rounded=1;fillColor=#e8f5e9;strokeColor=#43a047;strokeWidth=2;fontSize=11;align=left;spacingLeft=8;verticalAlign=top;whiteSpace=wrap;" value="★ NUEVO — 02-flask-deployment.yaml&#xa;&#xa;• Deployment flask-app, 3 réplicas&#xa;• image: flask-k8s-app:1.0&#xa;• Controller Manager crea el ReplicaSet&#xa;• ReplicaSet mantiene 3 pods corriendo siempre&#xa;• livenessProbe + readinessProbe en /health" vertex="1">
+          <mxGeometry height="160" width="550" x="620" y="100" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="03 - Flask Service" id="d03">
+    <mxGraphModel dx="1698" dy="1038" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="950" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="cl" parent="1" style="rounded=1;fillColor=#f0f8ff;strokeColor=#1565c0;strokeWidth=3;fontSize=16;fontStyle=1;verticalAlign=top;arcSize=2;whiteSpace=wrap;" value="☸ Kubernetes Cluster" vertex="1">
+          <mxGeometry height="940" width="1190" x="5" y="5" as="geometry" />
+        </mxCell>
+        <mxCell id="cp" parent="1" style="rounded=0;fillColor=#1a237e;strokeColor=#0d47a1;fontColor=#ffffff;fontSize=11;fontStyle=1;" value="Control Plane — API Server | etcd | Scheduler | Controller Manager | CoreDNS" vertex="1">
+          <mxGeometry height="48" width="1170" x="15" y="15" as="geometry" />
+        </mxCell>
+        <mxCell id="ns" parent="1" style="rounded=1;fillColor=#e8eaf6;strokeColor=#3949ab;strokeWidth=3;fontSize=15;fontStyle=3;verticalAlign=top;whiteSpace=wrap;" value="Namespace: flask-app" vertex="1">
+          <mxGeometry height="865" width="1170" x="15" y="72" as="geometry" />
+        </mxCell>
+        <mxCell id="fsvc" parent="1" style="rounded=0;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=3;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Service: flask-service  |  ClusterIP  |  port 5000  |  selector: app=flask" vertex="1">
+          <mxGeometry height="55" width="560" x="30" y="98" as="geometry" />
+        </mxCell>
+        <mxCell id="fd" parent="1" style="rounded=1;fontSize=14;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;" value="Deployment: flask-app" vertex="1">
+          <mxGeometry height="745" width="560" x="30" y="163" as="geometry" />
+        </mxCell>
+        <mxCell id="frs" parent="1" style="rounded=1;fillColor=#546e7a;strokeColor=#37474f;fontColor=#ffffff;fontSize=12;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;" value="ReplicaSet (flask-app-xxxx)" vertex="1">
+          <mxGeometry height="660" width="520" x="50" y="213" as="geometry" />
+        </mxCell>
+        <mxCell id="fp1" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Flask Pod 1&#xa;flask-k8s-app:1.0" vertex="1">
+          <mxGeometry height="100" width="210" x="75" y="263" as="geometry" />
+        </mxCell>
+        <mxCell id="fp2" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Flask Pod 2&#xa;flask-k8s-app:1.0" vertex="1">
+          <mxGeometry height="100" width="210" x="75" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="fp3" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Flask Pod 3&#xa;flask-k8s-app:1.0" vertex="1">
+          <mxGeometry height="100" width="210" x="75" y="517" as="geometry" />
+        </mxCell>
+        <mxCell id="es1" edge="1" parent="1" source="fsvc" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#80cbc4;strokeWidth=2;" target="fp1" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="es2" edge="1" parent="1" source="fsvc" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#80cbc4;strokeWidth=2;" target="fp2" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="310" y="372" />
+              <mxPoint x="180" y="372" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="es3" edge="1" parent="1" source="fsvc" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#80cbc4;strokeWidth=2;" target="fp3" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="310" y="567" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="desc" parent="1" style="rounded=1;fillColor=#e8f5e9;strokeColor=#43a047;strokeWidth=2;fontSize=11;align=left;spacingLeft=8;verticalAlign=top;whiteSpace=wrap;" value="★ NUEVO — 03-flask-service.yaml&#xa;&#xa;• Service flask-service tipo ClusterIP&#xa;• IP virtual estable aunque los pods mueran y recreen&#xa;• Balancea tráfico round-robin entre los 3 Flask Pods&#xa;• DNS interno: flask-service.flask-app.svc.cluster.local&#xa;• Selector: app=flask, tier=backend" vertex="1">
+          <mxGeometry height="155" width="550" x="620" y="98" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="04 - Postgres Secret" id="d04">
+    <mxGraphModel dx="1557" dy="952" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="950" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="cl" parent="1" style="rounded=1;fillColor=#f0f8ff;strokeColor=#1565c0;strokeWidth=3;fontSize=16;fontStyle=1;verticalAlign=top;arcSize=2;whiteSpace=wrap;" value="☸ Kubernetes Cluster" vertex="1">
+          <mxGeometry height="940" width="1190" x="5" y="5" as="geometry" />
+        </mxCell>
+        <mxCell id="cp" parent="1" style="rounded=0;fillColor=#1a237e;strokeColor=#0d47a1;fontColor=#ffffff;fontSize=11;fontStyle=1;" value="Control Plane — API Server | etcd | Scheduler | Controller Manager | CoreDNS" vertex="1">
+          <mxGeometry height="48" width="1170" x="15" y="15" as="geometry" />
+        </mxCell>
+        <mxCell id="ns" parent="1" style="rounded=1;fillColor=#e8eaf6;strokeColor=#3949ab;strokeWidth=3;fontSize=15;fontStyle=3;verticalAlign=top;whiteSpace=wrap;" value="Namespace: flask-app" vertex="1">
+          <mxGeometry height="865" width="1170" x="15" y="72" as="geometry" />
+        </mxCell>
+        <mxCell id="fsvc" parent="1" style="rounded=0;fillColor=#37474f;strokeColor=#263238;fontColor=#ffffff;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Service: flask-service  |  ClusterIP  |  port 5000" vertex="1">
+          <mxGeometry height="55" width="560" x="30" y="98" as="geometry" />
+        </mxCell>
+        <mxCell id="fd" parent="1" style="rounded=1;fontSize=14;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;" value="Deployment: flask-app" vertex="1">
+          <mxGeometry height="745" width="560" x="30" y="163" as="geometry" />
+        </mxCell>
+        <mxCell id="frs" parent="1" style="rounded=1;fillColor=#546e7a;strokeColor=#37474f;fontColor=#ffffff;fontSize=12;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;" value="ReplicaSet (flask-app-xxxx)" vertex="1">
+          <mxGeometry height="660" width="520" x="50" y="213" as="geometry" />
+        </mxCell>
+        <mxCell id="fp1" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Flask Pod 1&#xa;flask-k8s-app:1.0" vertex="1">
+          <mxGeometry height="100" width="210" x="75" y="263" as="geometry" />
+        </mxCell>
+        <mxCell id="fp2" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Flask Pod 2&#xa;flask-k8s-app:1.0" vertex="1">
+          <mxGeometry height="100" width="210" x="75" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="fp3" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Flask Pod 3&#xa;flask-k8s-app:1.0" vertex="1">
+          <mxGeometry height="100" width="210" x="75" y="517" as="geometry" />
+        </mxCell>
+        <mxCell id="pgsec" parent="1" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=3;fontSize=11;fontStyle=1;align=left;spacingLeft=8;verticalAlign=top;whiteSpace=wrap;" value="Secret: postgres-secret&#xa;type: Opaque&#xa;POSTGRES_USER: flaskuser&#xa;POSTGRES_PASSWORD: ****&#xa;POSTGRES_DB: flaskdb" vertex="1">
+          <mxGeometry height="155" width="320" x="620" y="98" as="geometry" />
+        </mxCell>
+        <mxCell id="desc" parent="1" style="rounded=1;fillColor=#e8f5e9;strokeColor=#43a047;strokeWidth=2;fontSize=11;align=left;spacingLeft=8;verticalAlign=top;whiteSpace=wrap;" value="★ NUEVO — 04-postgres-secret.yaml&#xa;&#xa;• Secret tipo Opaque — almacena credenciales de BD&#xa;• stringData: escrito en texto plano, guardado en base64&#xa;• base64 NO es cifrado — solo conveniencia de escritura&#xa;• Cifrado real requiere EncryptionConfiguration en etcd&#xa;• Se referenciará con secretKeyRef (Flask) y envFrom (Postgres)" vertex="1">
+          <mxGeometry height="150" width="550" x="620" y="275" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="05 - Postgres PVC" id="d05">
+    <mxGraphModel dx="1557" dy="952" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="950" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="cl" parent="1" style="rounded=1;fillColor=#f0f8ff;strokeColor=#1565c0;strokeWidth=3;fontSize=16;fontStyle=1;verticalAlign=top;arcSize=2;whiteSpace=wrap;" value="☸ Kubernetes Cluster" vertex="1">
+          <mxGeometry height="940" width="1190" x="5" y="5" as="geometry" />
+        </mxCell>
+        <mxCell id="cp" parent="1" style="rounded=0;fillColor=#1a237e;strokeColor=#0d47a1;fontColor=#ffffff;fontSize=11;fontStyle=1;" value="Control Plane — API Server | etcd | Scheduler | Controller Manager | CoreDNS" vertex="1">
+          <mxGeometry height="48" width="1170" x="15" y="15" as="geometry" />
+        </mxCell>
+        <mxCell id="ns" parent="1" style="rounded=1;fillColor=#e8eaf6;strokeColor=#3949ab;strokeWidth=3;fontSize=15;fontStyle=3;verticalAlign=top;whiteSpace=wrap;" value="Namespace: flask-app" vertex="1">
+          <mxGeometry height="865" width="1170" x="15" y="72" as="geometry" />
+        </mxCell>
+        <mxCell id="fsvc" parent="1" style="rounded=0;fillColor=#37474f;strokeColor=#263238;fontColor=#ffffff;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Service: flask-service  |  ClusterIP  |  port 5000" vertex="1">
+          <mxGeometry height="55" width="560" x="30" y="98" as="geometry" />
+        </mxCell>
+        <mxCell id="fd" parent="1" style="rounded=1;fontSize=14;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;" value="Deployment: flask-app" vertex="1">
+          <mxGeometry height="745" width="560" x="30" y="163" as="geometry" />
+        </mxCell>
+        <mxCell id="frs" parent="1" style="rounded=1;fillColor=#546e7a;strokeColor=#37474f;fontColor=#ffffff;fontSize=12;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;" value="ReplicaSet (flask-app-xxxx)" vertex="1">
+          <mxGeometry height="660" width="520" x="50" y="213" as="geometry" />
+        </mxCell>
+        <mxCell id="fp1" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Flask Pod 1&#xa;flask-k8s-app:1.0" vertex="1">
+          <mxGeometry height="100" width="210" x="75" y="263" as="geometry" />
+        </mxCell>
+        <mxCell id="fp2" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Flask Pod 2&#xa;flask-k8s-app:1.0" vertex="1">
+          <mxGeometry height="100" width="210" x="75" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="fp3" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Flask Pod 3&#xa;flask-k8s-app:1.0" vertex="1">
+          <mxGeometry height="100" width="210" x="75" y="517" as="geometry" />
+        </mxCell>
+        <mxCell id="pgsec" parent="1" style="rounded=1;fillColor=#f9a825;strokeColor=#f57f17;fontColor=#000000;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Secret: postgres-secret&#xa;POSTGRES_USER / PASSWORD / DB" vertex="1">
+          <mxGeometry height="75" width="320" x="620" y="98" as="geometry" />
+        </mxCell>
+        <mxCell id="pgpvc" parent="1" style="shape=cylinder3;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=3;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="PVC: postgres-pvc&#xa;1Gi | ReadWriteOnce&#xa;storageClass: hostpath" vertex="1">
+          <mxGeometry height="110" width="280" x="620" y="195" as="geometry" />
+        </mxCell>
+        <mxCell id="pgpv" parent="1" style="shape=cylinder3;fillColor=#004d40;strokeColor=#43a047;strokeWidth=3;fontColor=#ffffff;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="PersistentVolume&#xa;1Gi | hostpath&#xa;/var/lib/postgresql/data" vertex="1">
+          <mxGeometry height="100" width="280" x="620" y="335" as="geometry" />
+        </mxCell>
+        <mxCell id="ebind" edge="1" parent="1" source="pgpvc" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#43a047;strokeWidth=2;fontSize=10;" target="pgpv" value="Bound">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="desc" parent="1" style="rounded=1;fillColor=#e8f5e9;strokeColor=#43a047;strokeWidth=2;fontSize=11;align=left;spacingLeft=8;verticalAlign=top;whiteSpace=wrap;" value="★ NUEVO — 05-postgres-pvc.yaml&#xa;&#xa;• PVC solicita 1Gi de almacenamiento persistente&#xa;• ReadWriteOnce: solo un nodo monta en R/W a la vez&#xa;• Dynamic provisioning: K8s crea el PV automáticamente&#xa;• Datos sobreviven reinicios y recreación de pods&#xa;• Sin PVC: si el pod muere, los datos se pierden" vertex="1">
+          <mxGeometry height="150" width="550" x="620" y="460" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="06 - Postgres Deployment" id="d06">
+    <mxGraphModel dx="849" dy="519" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="950" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="cl" parent="1" style="rounded=1;fillColor=#f0f8ff;strokeColor=#1565c0;strokeWidth=3;fontSize=16;fontStyle=1;verticalAlign=top;arcSize=2;whiteSpace=wrap;" value="☸ Kubernetes Cluster" vertex="1">
+          <mxGeometry height="940" width="1490" x="5" y="5" as="geometry" />
+        </mxCell>
+        <mxCell id="cp" parent="1" style="rounded=0;fillColor=#1a237e;strokeColor=#0d47a1;fontColor=#ffffff;fontSize=11;fontStyle=1;" value="Control Plane — API Server | etcd | Scheduler | Controller Manager | CoreDNS" vertex="1">
+          <mxGeometry height="48" width="1470" x="15" y="15" as="geometry" />
+        </mxCell>
+        <mxCell id="ns" parent="1" style="rounded=1;fillColor=#e8eaf6;strokeColor=#3949ab;strokeWidth=3;fontSize=15;fontStyle=3;verticalAlign=top;whiteSpace=wrap;" value="Namespace: flask-app" vertex="1">
+          <mxGeometry height="865" width="1470" x="15" y="72" as="geometry" />
+        </mxCell>
+        <mxCell id="fsvc" parent="1" style="rounded=0;fillColor=#37474f;strokeColor=#263238;fontColor=#ffffff;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Service: flask-service  |  ClusterIP  |  port 5000" vertex="1">
+          <mxGeometry height="55" width="620" x="30" y="98" as="geometry" />
+        </mxCell>
+        <mxCell id="fd" parent="1" style="rounded=1;fontSize=14;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;" value="Deployment: flask-app" vertex="1">
+          <mxGeometry height="745" width="620" x="30" y="163" as="geometry" />
+        </mxCell>
+        <mxCell id="frs" parent="1" style="rounded=1;fillColor=#546e7a;strokeColor=#37474f;fontColor=#ffffff;fontSize=12;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;" value="ReplicaSet (flask-app-xxxx)" vertex="1">
+          <mxGeometry height="660" width="580" x="50" y="213" as="geometry" />
+        </mxCell>
+        <mxCell id="fp1" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Flask Pod 1&#xa;flask-k8s-app:1.0" vertex="1">
+          <mxGeometry height="100" width="210" x="70" y="263" as="geometry" />
+        </mxCell>
+        <mxCell id="fp2" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Flask Pod 2&#xa;flask-k8s-app:1.0" vertex="1">
+          <mxGeometry height="100" width="210" x="70" y="383" as="geometry" />
+        </mxCell>
+        <mxCell id="fp3" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Flask Pod 3&#xa;flask-k8s-app:1.0" vertex="1">
+          <mxGeometry height="100" width="210" x="70" y="503" as="geometry" />
+        </mxCell>
+        <mxCell id="pgd" parent="1" style="rounded=1;fillColor=#f5f5f5;strokeColor=#666666;strokeWidth=3;fontColor=#333333;fontSize=14;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;" value="Deployment: postgres" vertex="1">
+          <mxGeometry height="745" width="800" x="670" y="163" as="geometry" />
+        </mxCell>
+        <mxCell id="pgrs" parent="1" style="rounded=1;fillColor=#546e7a;strokeColor=#43a047;strokeWidth=3;fontColor=#ffffff;fontSize=12;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;" value="ReplicaSet (postgres-xxxx)" vertex="1">
+          <mxGeometry height="660" width="760" x="690" y="213" as="geometry" />
+        </mxCell>
+        <mxCell id="pgp" parent="1" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=3;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Postgres Pod&#xa;postgres:15-alpine&#xa;port 5432" vertex="1">
+          <mxGeometry height="110" width="220" x="710" y="263" as="geometry" />
+        </mxCell>
+        <mxCell id="pgsec" parent="1" style="rounded=1;fillColor=#f9a825;strokeColor=#43a047;strokeWidth=3;fontColor=#000000;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="Secret: postgres-secret&#xa;envFrom — inyecta TODAS&#xa;las keys como env vars" vertex="1">
+          <mxGeometry height="90" width="255" x="1093" y="273" as="geometry" />
+        </mxCell>
+        <mxCell id="pgpvc" parent="1" style="shape=cylinder3;fillColor=#00838f;strokeColor=#43a047;strokeWidth=3;fontColor=#ffffff;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="PVC: postgres-pvc&#xa;mountPath: /var/lib/postgresql/data&#xa;subPath: postgres" vertex="1">
+          <mxGeometry height="110" width="260" x="710" y="415" as="geometry" />
+        </mxCell>
+        <mxCell id="pgpv" parent="1" style="shape=cylinder3;fillColor=#004d40;strokeColor=#37474f;fontColor=#ffffff;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="PersistentVolume 1Gi" vertex="1">
+          <mxGeometry height="85" width="260" x="710" y="555" as="geometry" />
+        </mxCell>
+        <mxCell id="eenv" edge="1" parent="1" source="pgp" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#f9a825;strokeWidth=2;fontSize=9;" target="pgsec" value="envFrom">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="evol" edge="1" parent="1" source="pgp" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#00838f;strokeWidth=2;dashed=1;fontSize=9;" target="pgpvc" value="volumeMount">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ebind" edge="1" parent="1" source="pgpvc" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#00838f;strokeWidth=2;fontSize=9;" target="pgpv" value="Bound">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="desc" parent="1" style="rounded=1;fillColor=#e8f5e9;strokeColor=#43a047;strokeWidth=2;fontSize=11;align=left;spacingLeft=8;verticalAlign=top;whiteSpace=wrap;" value="★ NUEVO — 06-postgres-deployment.yaml&#xa;&#xa;• replicas:1 — PostgreSQL es stateful, no escala sin StatefulSet&#xa;• envFrom carga TODO el Secret como env vars de una vez&#xa;• volumeMounts monta PVC en /var/lib/postgresql/data&#xa;• subPath: postgres/ evita conflictos con archivos ocultos&#xa;• Probe: pg_isready en lugar de HTTP" vertex="1">
+          <mxGeometry height="155" width="480" x="950" y="683" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="07 - Postgres Service" id="d07">
+    <mxGraphModel dx="1557" dy="952" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="950" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="cl" parent="1" style="rounded=1;fillColor=#f0f8ff;strokeColor=#1565c0;strokeWidth=3;fontSize=16;fontStyle=1;verticalAlign=top;arcSize=2;whiteSpace=wrap;" value="☸ Kubernetes Cluster" vertex="1">
+          <mxGeometry height="940" width="1490" x="5" y="5" as="geometry" />
+        </mxCell>
+        <mxCell id="cp" parent="1" style="rounded=0;fillColor=#1a237e;strokeColor=#0d47a1;fontColor=#ffffff;fontSize=11;fontStyle=1;" value="Control Plane — API Server | etcd | Scheduler | Controller Manager | CoreDNS" vertex="1">
+          <mxGeometry height="48" width="1470" x="15" y="15" as="geometry" />
+        </mxCell>
+        <mxCell id="ns" parent="1" style="rounded=1;fillColor=#e8eaf6;strokeColor=#3949ab;strokeWidth=3;fontSize=15;fontStyle=3;verticalAlign=top;whiteSpace=wrap;" value="Namespace: flask-app" vertex="1">
+          <mxGeometry height="865" width="1470" x="15" y="72" as="geometry" />
+        </mxCell>
+        <mxCell id="fsvc" parent="1" style="rounded=0;fillColor=#37474f;strokeColor=#263238;fontColor=#ffffff;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Service: flask-service  |  ClusterIP  |  port 5000" vertex="1">
+          <mxGeometry height="55" width="620" x="30" y="98" as="geometry" />
+        </mxCell>
+        <mxCell id="fd" parent="1" style="rounded=1;fontSize=14;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;" value="Deployment: flask-app" vertex="1">
+          <mxGeometry height="745" width="620" x="30" y="163" as="geometry" />
+        </mxCell>
+        <mxCell id="frs" parent="1" style="rounded=1;fillColor=#546e7a;strokeColor=#37474f;fontColor=#ffffff;fontSize=12;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;" value="ReplicaSet (flask-app-xxxx)" vertex="1">
+          <mxGeometry height="660" width="580" x="50" y="213" as="geometry" />
+        </mxCell>
+        <mxCell id="fp1" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Flask Pod 1&#xa;flask-k8s-app:1.0" vertex="1">
+          <mxGeometry height="100" width="210" x="70" y="263" as="geometry" />
+        </mxCell>
+        <mxCell id="fp2" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Flask Pod 2&#xa;flask-k8s-app:1.0" vertex="1">
+          <mxGeometry height="100" width="210" x="70" y="383" as="geometry" />
+        </mxCell>
+        <mxCell id="fp3" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Flask Pod 3&#xa;flask-k8s-app:1.0" vertex="1">
+          <mxGeometry height="100" width="210" x="70" y="503" as="geometry" />
+        </mxCell>
+        <mxCell id="pgsvc" parent="1" style="rounded=0;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=3;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Service: postgres-service  |  ClusterIP  |  port 5432  |  selector: app=postgres" vertex="1">
+          <mxGeometry height="55" width="800" x="670" y="98" as="geometry" />
+        </mxCell>
+        <mxCell id="pgd" parent="1" style="rounded=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=14;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;" value="Deployment: postgres" vertex="1">
+          <mxGeometry height="745" width="800" x="670" y="163" as="geometry" />
+        </mxCell>
+        <mxCell id="pgrs" parent="1" style="rounded=1;fillColor=#546e7a;strokeColor=#37474f;fontColor=#ffffff;fontSize=12;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;" value="ReplicaSet (postgres-xxxx)" vertex="1">
+          <mxGeometry height="660" width="760" x="690" y="213" as="geometry" />
+        </mxCell>
+        <mxCell id="pgp" parent="1" style="rounded=1;fillColor=#0288d1;strokeColor=#0277bd;fontColor=#ffffff;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Postgres Pod&#xa;postgres:15-alpine | port 5432" vertex="1">
+          <mxGeometry height="100" width="220" x="710" y="263" as="geometry" />
+        </mxCell>
+        <mxCell id="pgsec" parent="1" style="rounded=1;fillColor=#f9a825;strokeColor=#f57f17;fontColor=#000000;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="Secret: postgres-secret (envFrom)" vertex="1">
+          <mxGeometry height="65" width="220" x="960" y="263" as="geometry" />
+        </mxCell>
+        <mxCell id="pgpvc" parent="1" style="shape=cylinder3;fillColor=#00838f;strokeColor=#006064;fontColor=#ffffff;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="PVC: postgres-pvc 1Gi" vertex="1">
+          <mxGeometry height="100" width="240" x="710" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="pgpv" parent="1" style="shape=cylinder3;fillColor=#004d40;strokeColor=#003330;fontColor=#ffffff;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="PersistentVolume 1Gi" vertex="1">
+          <mxGeometry height="85" width="240" x="710" y="525" as="geometry" />
+        </mxCell>
+        <mxCell id="evol" edge="1" parent="1" source="pgp" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#00838f;strokeWidth=2;dashed=1;fontSize=9;" target="pgpvc" value="vol">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ebind" edge="1" parent="1" source="pgpvc" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#00838f;strokeWidth=2;fontSize=9;" target="pgpv" value="Bound">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="epgsvc" edge="1" parent="1" source="pgsvc" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#80cbc4;strokeWidth=2;" target="pgp" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="desc" parent="1" style="rounded=1;fillColor=#e8f5e9;strokeColor=#43a047;strokeWidth=2;fontSize=11;align=left;spacingLeft=8;verticalAlign=top;whiteSpace=wrap;" value="★ NUEVO — 07-postgres-service.yaml&#xa;&#xa;• postgres-service ClusterIP — NO expuesto al exterior&#xa;• Flask conectará con DB_HOST=postgres-service&#xa;• CoreDNS resuelve postgres-service → IP virtual del Service&#xa;• ClusterIP mantiene BD inaccesible desde fuera del clúster" vertex="1">
+          <mxGeometry height="125" width="480" x="960" y="350" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="08 - Flask v2 + DB" id="d08">
+    <mxGraphModel dx="519" dy="317" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="950" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="cl" parent="1" style="rounded=1;fillColor=#f0f8ff;strokeColor=#1565c0;strokeWidth=3;fontSize=16;fontStyle=1;verticalAlign=top;arcSize=2;whiteSpace=wrap;" value="☸ Kubernetes Cluster" vertex="1">
+          <mxGeometry height="940" width="1490" x="5" y="5" as="geometry" />
+        </mxCell>
+        <mxCell id="cp" parent="1" style="rounded=0;fillColor=#1a237e;strokeColor=#0d47a1;fontColor=#ffffff;fontSize=11;fontStyle=1;" value="Control Plane — API Server | etcd | Scheduler | Controller Manager | CoreDNS" vertex="1">
+          <mxGeometry height="48" width="1470" x="15" y="15" as="geometry" />
+        </mxCell>
+        <mxCell id="ns" parent="1" style="rounded=1;fillColor=#e8eaf6;strokeColor=#3949ab;strokeWidth=3;fontSize=15;fontStyle=3;verticalAlign=top;whiteSpace=wrap;" value="Namespace: flask-app" vertex="1">
+          <mxGeometry height="865" width="1470" x="15" y="72" as="geometry" />
+        </mxCell>
+        <mxCell id="fsvc" parent="1" style="rounded=0;fillColor=#37474f;strokeColor=#263238;fontColor=#ffffff;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Service: flask-service  |  ClusterIP  |  port 5000" vertex="1">
+          <mxGeometry height="55" width="620" x="30" y="98" as="geometry" />
+        </mxCell>
+        <mxCell id="fd" parent="1" style="rounded=1;strokeWidth=3;fontSize=13;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;" value="Deployment: flask-app  ★ rolling update → image 2.0" vertex="1">
+          <mxGeometry height="745" width="620" x="30" y="163" as="geometry" />
+        </mxCell>
+        <mxCell id="frs" parent="1" style="rounded=1;fillColor=#546e7a;strokeColor=#43a047;strokeWidth=3;fontColor=#ffffff;fontSize=11;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;" value="ReplicaSet (flask-app-yyyy)  — nuevo RS para rolling update" vertex="1">
+          <mxGeometry height="660" width="580" x="50" y="213" as="geometry" />
+        </mxCell>
+        <mxCell id="fp1" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=3;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="Flask Pod 1 ★&#xa;flask-k8s-app:2.0&#xa;DB_HOST=postgres-service&#xa;POSTGRES_* via secretKeyRef" vertex="1">
+          <mxGeometry height="120" width="230" x="70" y="263" as="geometry" />
+        </mxCell>
+        <mxCell id="fp2" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=3;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="Flask Pod 2 ★&#xa;flask-k8s-app:2.0&#xa;+DB vars" vertex="1">
+          <mxGeometry height="110" width="230" x="70" y="403" as="geometry" />
+        </mxCell>
+        <mxCell id="fp3" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=3;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="Flask Pod 3 ★&#xa;flask-k8s-app:2.0&#xa;+DB vars" vertex="1">
+          <mxGeometry height="110" width="230" x="70" y="533" as="geometry" />
+        </mxCell>
+        <mxCell id="fpsec" parent="1" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=3;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="Secret: postgres-secret&#xa;(secretKeyRef — inyecta credenciales&#xa;individualmente como env vars)" vertex="1">
+          <mxGeometry height="95" width="265" x="357" y="263" as="geometry" />
+        </mxCell>
+        <mxCell id="pgsvc" parent="1" style="rounded=0;fillColor=#37474f;strokeColor=#263238;fontColor=#ffffff;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Service: postgres-service  |  ClusterIP  |  port 5432" vertex="1">
+          <mxGeometry height="55" width="800" x="670" y="98" as="geometry" />
+        </mxCell>
+        <mxCell id="pgd" parent="1" style="rounded=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=14;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;" value="Deployment: postgres" vertex="1">
+          <mxGeometry height="745" width="800" x="670" y="163" as="geometry" />
+        </mxCell>
+        <mxCell id="pgrs" parent="1" style="rounded=1;fillColor=#546e7a;strokeColor=#37474f;fontColor=#ffffff;fontSize=12;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;" value="ReplicaSet (postgres-xxxx)" vertex="1">
+          <mxGeometry height="660" width="760" x="690" y="213" as="geometry" />
+        </mxCell>
+        <mxCell id="pgp" parent="1" style="rounded=1;fillColor=#0288d1;strokeColor=#0277bd;fontColor=#ffffff;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Postgres Pod&#xa;postgres:15-alpine | port 5432" vertex="1">
+          <mxGeometry height="100" width="220" x="710" y="263" as="geometry" />
+        </mxCell>
+        <mxCell id="pgsec2" parent="1" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="Secret: postgres-secret (envFrom)" vertex="1">
+          <mxGeometry height="65" width="215" x="960" y="263" as="geometry" />
+        </mxCell>
+        <mxCell id="pgpvc" parent="1" style="shape=cylinder3;fillColor=#00838f;strokeColor=#006064;fontColor=#ffffff;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="PVC: postgres-pvc 1Gi" vertex="1">
+          <mxGeometry height="95" width="235" x="710" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="pgpv" parent="1" style="shape=cylinder3;fillColor=#004d40;strokeColor=#003330;fontColor=#ffffff;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="PersistentVolume 1Gi" vertex="1">
+          <mxGeometry height="80" width="235" x="710" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="evol" edge="1" parent="1" source="pgp" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#00838f;strokeWidth=2;dashed=1;fontSize=9;" target="pgpvc" value="vol">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ebind" edge="1" parent="1" source="pgpvc" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#00838f;strokeWidth=2;fontSize=9;" target="pgpv" value="Bound">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="epgsvc" edge="1" parent="1" source="pgsvc" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#80cbc4;strokeWidth=2;" target="pgp" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ef1db" edge="1" parent="1" source="fp1" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#43a047;strokeWidth=2;fontSize=10;fontStyle=1;" target="pgsvc" value="DB_HOST">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="185" y="196" />
+              <mxPoint x="1070" y="196" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="efsec" edge="1" parent="1" source="fp1" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#f9a825;strokeWidth=2;dashed=1;fontSize=9;" target="fpsec" value="secretKeyRef">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="desc" parent="1" style="rounded=1;fillColor=#e8f5e9;strokeColor=#43a047;strokeWidth=2;fontSize=11;align=left;spacingLeft=8;verticalAlign=top;whiteSpace=wrap;" value="★ ACTUALIZADO — 08-flask-deployment-db.yaml&#xa;&#xa;• kubectl apply sobre mismo Deployment → rolling update sin downtime&#xa;• image 1.0 → 2.0 | APP_ENV: development → production&#xa;• Nuevas env vars: DB_HOST=postgres-service, DB_PORT=5432&#xa;• secretKeyRef inyecta POSTGRES_USER/PASSWORD/DB del Secret&#xa;• K8s crea nuevo ReplicaSet, migra pods gradualmente" vertex="1">
+          <mxGeometry height="155" width="480" x="960" y="350" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="09 - Nginx ConfigMap" id="d09">
+    <mxGraphModel dx="1557" dy="952" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="950" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="cl" parent="1" style="rounded=1;fillColor=#f0f8ff;strokeColor=#1565c0;strokeWidth=3;fontSize=16;fontStyle=1;verticalAlign=top;arcSize=2;whiteSpace=wrap;" value="☸ Kubernetes Cluster" vertex="1">
+          <mxGeometry height="940" width="1490" x="5" y="5" as="geometry" />
+        </mxCell>
+        <mxCell id="cp" parent="1" style="rounded=0;fillColor=#1a237e;strokeColor=#0d47a1;fontColor=#ffffff;fontSize=11;fontStyle=1;" value="Control Plane — API Server | etcd | Scheduler | Controller Manager | CoreDNS" vertex="1">
+          <mxGeometry height="48" width="1470" x="15" y="15" as="geometry" />
+        </mxCell>
+        <mxCell id="ns" parent="1" style="rounded=1;fillColor=#e8eaf6;strokeColor=#3949ab;strokeWidth=3;fontSize=15;fontStyle=3;verticalAlign=top;whiteSpace=wrap;" value="Namespace: flask-app" vertex="1">
+          <mxGeometry height="865" width="1470" x="15" y="72" as="geometry" />
+        </mxCell>
+        <mxCell id="fsvc" parent="1" style="rounded=0;fillColor=#37474f;strokeColor=#263238;fontColor=#ffffff;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Service: flask-service  |  ClusterIP  |  port 5000" vertex="1">
+          <mxGeometry height="55" width="620" x="30" y="98" as="geometry" />
+        </mxCell>
+        <mxCell id="fd" parent="1" style="rounded=1;fontSize=14;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;" value="Deployment: flask-app (image: 2.0)" vertex="1">
+          <mxGeometry height="745" width="620" x="30" y="163" as="geometry" />
+        </mxCell>
+        <mxCell id="frs" parent="1" style="rounded=1;fillColor=#546e7a;strokeColor=#37474f;fontColor=#ffffff;fontSize=12;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;" value="ReplicaSet (flask-app-yyyy)" vertex="1">
+          <mxGeometry height="660" width="580" x="50" y="213" as="geometry" />
+        </mxCell>
+        <mxCell id="fp1" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="Flask Pod 1&#xa;flask-k8s-app:2.0&#xa;+DB_HOST +secretKeyRef" vertex="1">
+          <mxGeometry height="105" width="220" x="70" y="263" as="geometry" />
+        </mxCell>
+        <mxCell id="fp2" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="Flask Pod 2&#xa;flask-k8s-app:2.0" vertex="1">
+          <mxGeometry height="95" width="220" x="70" y="388" as="geometry" />
+        </mxCell>
+        <mxCell id="fp3" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="Flask Pod 3&#xa;flask-k8s-app:2.0" vertex="1">
+          <mxGeometry height="95" width="220" x="70" y="503" as="geometry" />
+        </mxCell>
+        <mxCell id="fpsec" parent="1" style="rounded=1;fillColor=#f9a825;strokeColor=#f57f17;fontColor=#000000;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="Secret: postgres-secret&#xa;(secretKeyRef)" vertex="1">
+          <mxGeometry height="65" width="265" x="315" y="263" as="geometry" />
+        </mxCell>
+        <mxCell id="pgsvc" parent="1" style="rounded=0;fillColor=#37474f;strokeColor=#263238;fontColor=#ffffff;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Service: postgres-service  |  ClusterIP  |  port 5432" vertex="1">
+          <mxGeometry height="55" width="800" x="670" y="98" as="geometry" />
+        </mxCell>
+        <mxCell id="pgd" parent="1" style="rounded=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=14;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;" value="Deployment: postgres" vertex="1">
+          <mxGeometry height="745" width="800" x="670" y="163" as="geometry" />
+        </mxCell>
+        <mxCell id="pgrs" parent="1" style="rounded=1;fillColor=#546e7a;strokeColor=#37474f;fontColor=#ffffff;fontSize=12;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;" value="ReplicaSet (postgres-xxxx)" vertex="1">
+          <mxGeometry height="660" width="760" x="690" y="213" as="geometry" />
+        </mxCell>
+        <mxCell id="pgp" parent="1" style="rounded=1;fillColor=#0288d1;strokeColor=#0277bd;fontColor=#ffffff;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Postgres Pod&#xa;postgres:15-alpine | port 5432" vertex="1">
+          <mxGeometry height="100" width="220" x="710" y="263" as="geometry" />
+        </mxCell>
+        <mxCell id="pgsec2" parent="1" style="rounded=1;fillColor=#f9a825;strokeColor=#f57f17;fontColor=#000000;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="Secret: postgres-secret (envFrom)" vertex="1">
+          <mxGeometry height="60" width="215" x="960" y="263" as="geometry" />
+        </mxCell>
+        <mxCell id="ngcm" parent="1" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=3;fontSize=11;fontStyle=1;align=left;spacingLeft=8;verticalAlign=top;whiteSpace=wrap;" value="ConfigMap: nginx-config&#xa;nginx.conf&#xa;upstream flask_backend {&#xa;  server flask-service:5000;&#xa;}&#xa;proxy_pass http://flask_backend" vertex="1">
+          <mxGeometry height="145" width="420" x="963" y="395" as="geometry" />
+        </mxCell>
+        <mxCell id="pgpvc" parent="1" style="shape=cylinder3;fillColor=#00838f;strokeColor=#006064;fontColor=#ffffff;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="PVC: postgres-pvc 1Gi" vertex="1">
+          <mxGeometry height="90" width="230" x="710" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="pgpv" parent="1" style="shape=cylinder3;fillColor=#004d40;strokeColor=#003330;fontColor=#ffffff;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="PersistentVolume 1Gi" vertex="1">
+          <mxGeometry height="80" width="230" x="710" y="672" as="geometry" />
+        </mxCell>
+        <mxCell id="evol" edge="1" parent="1" source="pgp" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#00838f;strokeWidth=2;dashed=1;fontSize=9;" target="pgpvc" value="vol">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ebind" edge="1" parent="1" source="pgpvc" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#00838f;strokeWidth=2;fontSize=9;" target="pgpv" value="Bound">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="epgsvc" edge="1" parent="1" source="pgsvc" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#80cbc4;strokeWidth=2;" target="pgp" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ef1db" edge="1" parent="1" source="fp1" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#ffcc80;strokeWidth=2;fontSize=9;" target="pgsvc" value="DB_HOST">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="180" y="382" />
+              <mxPoint x="1070" y="382" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="desc" parent="1" style="rounded=1;fillColor=#e8f5e9;strokeColor=#43a047;strokeWidth=2;fontSize=11;align=left;spacingLeft=8;verticalAlign=top;whiteSpace=wrap;" value="★ NUEVO — 09-nginx-configmap.yaml&#xa;&#xa;• ConfigMap almacena nginx.conf como dato no sensible&#xa;• upstream flask_backend apunta a flask-service:5000&#xa;• proxy_pass redirige TODO el tráfico entrante a Flask&#xa;• Se montará como volumen con subPath: nginx.conf&#xa;• subPath evita reemplazar todo /etc/nginx/ — solo ese archivo" vertex="1">
+          <mxGeometry height="150" width="620" x="30" y="653" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="10 - Nginx Deployment" id="d10">
+    <mxGraphModel dx="983" dy="601" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="950" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="cl" parent="1" style="rounded=1;fillColor=#f0f8ff;strokeColor=#1565c0;strokeWidth=3;fontSize=16;fontStyle=1;verticalAlign=top;arcSize=2;whiteSpace=wrap;" value="☸ Kubernetes Cluster" vertex="1">
+          <mxGeometry height="940" width="1790" x="5" y="5" as="geometry" />
+        </mxCell>
+        <mxCell id="cp" parent="1" style="rounded=0;fillColor=#1a237e;strokeColor=#0d47a1;fontColor=#ffffff;fontSize=11;fontStyle=1;" value="Control Plane — API Server | etcd | Scheduler | Controller Manager | CoreDNS" vertex="1">
+          <mxGeometry height="48" width="1770" x="15" y="15" as="geometry" />
+        </mxCell>
+        <mxCell id="ns" parent="1" style="rounded=1;fillColor=#e8eaf6;strokeColor=#3949ab;strokeWidth=3;fontSize=15;fontStyle=3;verticalAlign=top;whiteSpace=wrap;" value="Namespace: flask-app" vertex="1">
+          <mxGeometry height="865" width="1770" x="15" y="72" as="geometry" />
+        </mxCell>
+        <mxCell id="ngd" parent="1" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=3;fontSize=14;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;" value="Deployment: nginx" vertex="1">
+          <mxGeometry height="745" width="480" x="30" y="163" as="geometry" />
+        </mxCell>
+        <mxCell id="ngrs" parent="1" style="rounded=1;fillColor=#546e7a;strokeColor=#43a047;strokeWidth=3;fontColor=#ffffff;fontSize=12;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;" value="ReplicaSet (nginx-xxxx)" vertex="1">
+          <mxGeometry height="660" width="440" x="50" y="213" as="geometry" />
+        </mxCell>
+        <mxCell id="ng1" parent="1" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=3;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Nginx Pod 1&#xa;nginx:1.25-alpine&#xa;port 80" vertex="1">
+          <mxGeometry height="110" width="200" x="70" y="263" as="geometry" />
+        </mxCell>
+        <mxCell id="ng2" parent="1" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=3;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Nginx Pod 2&#xa;nginx:1.25-alpine&#xa;port 80" vertex="1">
+          <mxGeometry height="110" width="200" x="70" y="403" as="geometry" />
+        </mxCell>
+        <mxCell id="ngcm" parent="1" style="rounded=1;fillColor=#388e3c;strokeColor=#43a047;strokeWidth=3;fontColor=#ffffff;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="ConfigMap: nginx-config&#xa;vol: /etc/nginx/nginx.conf&#xa;subPath: nginx.conf" vertex="1">
+          <mxGeometry height="90" width="175" x="233" y="602" as="geometry" />
+        </mxCell>
+        <mxCell id="eng1cm" edge="1" parent="1" source="ng1" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#a5d6a7;strokeWidth=2;dashed=1;fontSize=9;" target="ngcm" value="vol">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eng2cm" edge="1" parent="1" source="ng2" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#a5d6a7;strokeWidth=2;dashed=1;fontSize=9;" target="ngcm" value="vol">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fsvc" parent="1" style="rounded=0;fillColor=#37474f;strokeColor=#263238;fontColor=#ffffff;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Service: flask-service  |  ClusterIP  |  port 5000" vertex="1">
+          <mxGeometry height="55" width="570" x="530" y="98" as="geometry" />
+        </mxCell>
+        <mxCell id="fd" parent="1" style="rounded=1;fontSize=14;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;" value="Deployment: flask-app (image: 2.0)" vertex="1">
+          <mxGeometry height="745" width="570" x="530" y="163" as="geometry" />
+        </mxCell>
+        <mxCell id="frs" parent="1" style="rounded=1;fillColor=#546e7a;strokeColor=#37474f;fontColor=#ffffff;fontSize=12;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;" value="ReplicaSet (flask-app-yyyy)" vertex="1">
+          <mxGeometry height="660" width="530" x="550" y="213" as="geometry" />
+        </mxCell>
+        <mxCell id="fp1" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="Flask Pod 1&#xa;flask-k8s-app:2.0" vertex="1">
+          <mxGeometry height="100" width="205" x="570" y="263" as="geometry" />
+        </mxCell>
+        <mxCell id="fp2" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="Flask Pod 2&#xa;flask-k8s-app:2.0" vertex="1">
+          <mxGeometry height="95" width="205" x="570" y="383" as="geometry" />
+        </mxCell>
+        <mxCell id="fp3" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="Flask Pod 3&#xa;flask-k8s-app:2.0" vertex="1">
+          <mxGeometry height="95" width="205" x="570" y="498" as="geometry" />
+        </mxCell>
+        <mxCell id="fpsec" parent="1" style="rounded=1;fillColor=#f9a825;strokeColor=#f57f17;fontColor=#000000;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="Secret: postgres-secret&#xa;(secretKeyRef)" vertex="1">
+          <mxGeometry height="65" width="205" x="800" y="263" as="geometry" />
+        </mxCell>
+        <mxCell id="eng1fs" edge="1" parent="1" source="ng1" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#ce93d8;strokeWidth=2;fontSize=9;" target="fsvc" value="proxy_pass">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eng2fs" edge="1" parent="1" source="ng2" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#ce93d8;strokeWidth=2;fontSize=9;" target="fsvc" value="proxy_pass">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="efsvc" edge="1" parent="1" source="fsvc" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#80cbc4;strokeWidth=2;" target="fp1" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pgsvc" parent="1" style="rounded=0;fillColor=#37474f;strokeColor=#263238;fontColor=#ffffff;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Service: postgres-service  |  ClusterIP  |  port 5432" vertex="1">
+          <mxGeometry height="55" width="650" x="1120" y="98" as="geometry" />
+        </mxCell>
+        <mxCell id="pgd" parent="1" style="rounded=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=14;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;" value="Deployment: postgres" vertex="1">
+          <mxGeometry height="745" width="650" x="1120" y="163" as="geometry" />
+        </mxCell>
+        <mxCell id="pgrs" parent="1" style="rounded=1;fillColor=#546e7a;strokeColor=#37474f;fontColor=#ffffff;fontSize=12;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;" value="ReplicaSet (postgres-xxxx)" vertex="1">
+          <mxGeometry height="660" width="610" x="1140" y="213" as="geometry" />
+        </mxCell>
+        <mxCell id="pgp" parent="1" style="rounded=1;fillColor=#0288d1;strokeColor=#0277bd;fontColor=#ffffff;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Postgres Pod&#xa;postgres:15-alpine | port 5432" vertex="1">
+          <mxGeometry height="100" width="225" x="1160" y="263" as="geometry" />
+        </mxCell>
+        <mxCell id="pgsec2" parent="1" style="rounded=1;fillColor=#f9a825;strokeColor=#f57f17;fontColor=#000000;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="Secret: postgres-secret (envFrom)" vertex="1">
+          <mxGeometry height="65" width="205" x="1415" y="263" as="geometry" />
+        </mxCell>
+        <mxCell id="pgpvc" parent="1" style="shape=cylinder3;fillColor=#00838f;strokeColor=#006064;fontColor=#ffffff;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="PVC: postgres-pvc 1Gi" vertex="1">
+          <mxGeometry height="90" width="225" x="1160" y="395" as="geometry" />
+        </mxCell>
+        <mxCell id="pgpv" parent="1" style="shape=cylinder3;fillColor=#004d40;strokeColor=#003330;fontColor=#ffffff;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="PersistentVolume 1Gi" vertex="1">
+          <mxGeometry height="80" width="225" x="1160" y="510" as="geometry" />
+        </mxCell>
+        <mxCell id="evol" edge="1" parent="1" source="pgp" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#00838f;strokeWidth=2;dashed=1;fontSize=9;" target="pgpvc" value="vol">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ebind" edge="1" parent="1" source="pgpvc" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#00838f;strokeWidth=2;fontSize=9;" target="pgpv" value="Bound">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="epgsvc" edge="1" parent="1" source="pgsvc" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#80cbc4;strokeWidth=2;" target="pgp" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="efdb" edge="1" parent="1" source="fp1" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#ffcc80;strokeWidth=2;fontSize=9;" target="pgsvc" value="DB_HOST">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="desc" parent="1" style="rounded=1;fillColor=#e8f5e9;strokeColor=#43a047;strokeWidth=2;fontSize=11;align=left;spacingLeft=8;verticalAlign=top;whiteSpace=wrap;" value="★ NUEVO — 10-nginx-deployment.yaml&#xa;• 2 réplicas Nginx (HA para el proxy)&#xa;• Monta nginx-config con subPath: nginx.conf&#xa;• Nginx → proxy_pass → flask-service → Flask Pods" vertex="1">
+          <mxGeometry height="55" width="480" x="30" y="98" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="11 - Nginx Service (FINAL)" id="d11">
+    <mxGraphModel dx="3976" dy="1269" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1900" pageHeight="950" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="usr" parent="1" style="rounded=1;fillColor=#e3f2fd;strokeColor=#1565c0;strokeWidth=2;fontColor=#0d47a1;fontSize=12;fontStyle=1;whiteSpace=wrap;" value="👤 Usuario&#xa;Internet" vertex="1">
+          <mxGeometry height="75" width="120" x="-71" y="280.5" as="geometry" />
+        </mxCell>
+        <mxCell id="cl" parent="1" style="rounded=1;fillColor=#f0f8ff;strokeColor=#1565c0;strokeWidth=3;fontSize=16;fontStyle=1;verticalAlign=top;arcSize=2;whiteSpace=wrap;" value="☸ Kubernetes Cluster" vertex="1">
+          <mxGeometry height="940" width="1730" x="160" y="5" as="geometry" />
+        </mxCell>
+        <mxCell id="cp" parent="1" style="rounded=0;fillColor=#1a237e;strokeColor=#0d47a1;fontColor=#ffffff;fontSize=11;fontStyle=1;" value="Control Plane — API Server | etcd | Scheduler | Controller Manager | CoreDNS" vertex="1">
+          <mxGeometry height="48" width="1710" x="170" y="15" as="geometry" />
+        </mxCell>
+        <mxCell id="ns" parent="1" style="rounded=1;fillColor=#e8eaf6;strokeColor=#3949ab;strokeWidth=3;fontSize=15;fontStyle=3;verticalAlign=top;whiteSpace=wrap;" value="Namespace: flask-app" vertex="1">
+          <mxGeometry height="865" width="1710" x="170" y="72" as="geometry" />
+        </mxCell>
+        <mxCell id="ngsvc" parent="1" style="rounded=0;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=3;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Service: nginx-service  |  NodePort  |  port 80 → nodePort: 30080" vertex="1">
+          <mxGeometry height="55" width="490" x="185" y="98" as="geometry" />
+        </mxCell>
+        <mxCell id="ngd" parent="1" style="rounded=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=14;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;fontColor=#333333;" value="Deployment: nginx" vertex="1">
+          <mxGeometry height="745" width="490" x="185" y="163" as="geometry" />
+        </mxCell>
+        <mxCell id="ngrs" parent="1" style="rounded=1;fillColor=#546e7a;strokeColor=#37474f;fontColor=#ffffff;fontSize=12;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;" value="ReplicaSet (nginx-xxxx)" vertex="1">
+          <mxGeometry height="660" width="450" x="205" y="213" as="geometry" />
+        </mxCell>
+        <mxCell id="ng1" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Nginx Pod 1&#xa;nginx:1.25-alpine&#xa;port 80" vertex="1">
+          <mxGeometry height="110" width="200" x="225" y="263" as="geometry" />
+        </mxCell>
+        <mxCell id="ng2" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Nginx Pod 2&#xa;nginx:1.25-alpine&#xa;port 80" vertex="1">
+          <mxGeometry height="110" width="200" x="225" y="403" as="geometry" />
+        </mxCell>
+        <mxCell id="ngcm" parent="1" style="rounded=1;fillColor=#388e3c;strokeColor=#2e7d32;fontColor=#ffffff;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="ConfigMap: nginx-config&#xa;(vol: nginx.conf)" vertex="1">
+          <mxGeometry height="70" width="180" x="448" y="263" as="geometry" />
+        </mxCell>
+        <mxCell id="eng1cm" edge="1" parent="1" source="ng1" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#a5d6a7;strokeWidth=1;dashed=1;fontSize=9;" target="ngcm" value="vol">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eng2cm" edge="1" parent="1" source="ng2" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#a5d6a7;strokeWidth=1;dashed=1;fontSize=9;" target="ngcm" value="vol">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fsvc" parent="1" style="rounded=0;fillColor=#37474f;strokeColor=#263238;fontColor=#ffffff;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Service: flask-service  |  ClusterIP  |  port 5000" vertex="1">
+          <mxGeometry height="55" width="560" x="695" y="98" as="geometry" />
+        </mxCell>
+        <mxCell id="fd" parent="1" style="rounded=1;fontSize=14;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;" value="Deployment: flask-app (image: 2.0)" vertex="1">
+          <mxGeometry height="745" width="560" x="695" y="163" as="geometry" />
+        </mxCell>
+        <mxCell id="frs" parent="1" style="rounded=1;fillColor=#546e7a;strokeColor=#37474f;fontColor=#ffffff;fontSize=12;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;" value="ReplicaSet (flask-app-yyyy)" vertex="1">
+          <mxGeometry height="660" width="520" x="715" y="213" as="geometry" />
+        </mxCell>
+        <mxCell id="fp1" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="Flask Pod 1&#xa;flask-k8s-app:2.0&#xa;+DB_HOST +secretKeyRef" vertex="1">
+          <mxGeometry height="105" width="210" x="735" y="263" as="geometry" />
+        </mxCell>
+        <mxCell id="fp2" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="Flask Pod 2&#xa;flask-k8s-app:2.0" vertex="1">
+          <mxGeometry height="95" width="210" x="735" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="fp3" parent="1" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="Flask Pod 3&#xa;flask-k8s-app:2.0" vertex="1">
+          <mxGeometry height="95" width="210" x="735" y="505" as="geometry" />
+        </mxCell>
+        <mxCell id="fpsec" parent="1" style="rounded=1;fillColor=#f9a825;strokeColor=#f57f17;fontColor=#000000;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="Secret: postgres-secret&#xa;(secretKeyRef)" vertex="1">
+          <mxGeometry height="65" width="210" x="970" y="263" as="geometry" />
+        </mxCell>
+        <mxCell id="pgsvc" parent="1" style="rounded=0;fillColor=#37474f;strokeColor=#263238;fontColor=#ffffff;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Service: postgres-service  |  ClusterIP  |  port 5432" vertex="1">
+          <mxGeometry height="55" width="590" x="1275" y="98" as="geometry" />
+        </mxCell>
+        <mxCell id="pgd" parent="1" style="rounded=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=14;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;" value="Deployment: postgres" vertex="1">
+          <mxGeometry height="745" width="590" x="1275" y="163" as="geometry" />
+        </mxCell>
+        <mxCell id="pgrs" parent="1" style="rounded=1;fillColor=#546e7a;strokeColor=#37474f;fontColor=#ffffff;fontSize=12;fontStyle=1;verticalAlign=bottom;whiteSpace=wrap;" value="ReplicaSet (postgres-xxxx)" vertex="1">
+          <mxGeometry height="660" width="550" x="1295" y="213" as="geometry" />
+        </mxCell>
+        <mxCell id="pgp" parent="1" style="rounded=1;fillColor=#0288d1;strokeColor=#0277bd;fontColor=#ffffff;fontSize=11;fontStyle=1;whiteSpace=wrap;" value="Postgres Pod&#xa;postgres:15-alpine | port 5432" vertex="1">
+          <mxGeometry height="100" width="225" x="1315" y="263" as="geometry" />
+        </mxCell>
+        <mxCell id="pgsec2" parent="1" style="rounded=1;fillColor=#f9a825;strokeColor=#f57f17;fontColor=#000000;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="Secret: postgres-secret&#xa;(envFrom)" vertex="1">
+          <mxGeometry height="65" width="210" x="1565" y="263" as="geometry" />
+        </mxCell>
+        <mxCell id="pgpvc" parent="1" style="shape=cylinder3;fillColor=#00838f;strokeColor=#006064;fontColor=#ffffff;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="PVC: postgres-pvc 1Gi" vertex="1">
+          <mxGeometry height="90" width="220" x="1315" y="395" as="geometry" />
+        </mxCell>
+        <mxCell id="pgpv" parent="1" style="shape=cylinder3;fillColor=#004d40;strokeColor=#003330;fontColor=#ffffff;fontSize=10;fontStyle=1;whiteSpace=wrap;" value="PersistentVolume 1Gi" vertex="1">
+          <mxGeometry height="80" width="220" x="1315" y="510" as="geometry" />
+        </mxCell>
+        <mxCell id="eusr" edge="1" parent="1" source="usr" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#1565c0;strokeWidth=3;fontColor=#0d47a1;fontSize=10;fontStyle=1;" target="ngsvc" value="http://NODE_IP:30080">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="-10" y="126" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="engsvc1" edge="1" parent="1" source="ngsvc" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#ef9a9a;strokeWidth=2;" target="ng1" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="engsvc2" edge="1" parent="1" source="ngsvc" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#ef9a9a;strokeWidth=2;" target="ng2" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="eng1fs" edge="1" parent="1" source="ng1" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#ce93d8;strokeWidth=2;fontSize=9;" target="fsvc" value="proxy_pass">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="672" y="318" />
+              <mxPoint x="672" y="126" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="eng2fs" edge="1" parent="1" source="ng2" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#ce93d8;strokeWidth=2;fontSize=9;" target="fsvc" value="proxy_pass">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="641" y="458" />
+              <mxPoint x="641" y="126" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="efsvc" edge="1" parent="1" source="fsvc" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#80cbc4;strokeWidth=2;" target="fp1" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="efdb" edge="1" parent="1" source="fp1" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#ffcc80;strokeWidth=2;fontSize=9;" target="pgsvc" value="DB_HOST">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1247" y="316" />
+              <mxPoint x="1247" y="126" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="epgsvc" edge="1" parent="1" source="pgsvc" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#80cbc4;strokeWidth=2;" target="pgp" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="evol" edge="1" parent="1" source="pgp" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#00838f;strokeWidth=2;dashed=1;fontSize=9;" target="pgpvc" value="vol">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ebind" edge="1" parent="1" source="pgpvc" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#00838f;strokeWidth=2;fontSize=9;" target="pgpv" value="Bound">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="desc" parent="1" style="rounded=1;fillColor=#e8f5e9;strokeColor=#43a047;strokeWidth=2;fontSize=11;align=left;spacingLeft=8;verticalAlign=top;whiteSpace=wrap;" value="★ NUEVO — 11-nginx-service.yaml | ARQUITECTURA FINAL&#xa;&#xa;Flujo: Usuario:30080 → NodePort nginx-service → Nginx Pods → proxy_pass → flask-service → Flask Pods → postgres-service → Postgres Pod → PVC → PV&#xa;&#xa;Producción: reemplazar NodePort por LoadBalancer o agregar Ingress Controller" vertex="1">
+          <mxGeometry height="125" width="545" x="1295" y="625" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

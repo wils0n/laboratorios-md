@@ -1,4 +1,4 @@
-# Laboratorio 8.1: Kubernetes con Flask, PostgreSQL y Nginx
+# Laboratorio: Kubernetes con Flask, PostgreSQL y Nginx
 
 **Duración estimada:** 90–120 min  
 **Nivel:** Intermedio-Avanzado  
@@ -1427,13 +1427,6 @@ docker rmi flask-k8s-app:1.0 flask-k8s-app:2.0
 - [ ] Servicios DNS resolviendo correctamente
 - [ ] Escalado manual probado
 - [ ] Logs y métricas visibles
-
----
-
-## Detalle de Entregables
-
-- [Link detalle ](https://docs.google.com/document/d/1g_x9PpUlf_I_99Non8_fQCvNY8pI2tV-8YLTa1a_RSc/edit?usp=sharing)
-
 
 ---
 
