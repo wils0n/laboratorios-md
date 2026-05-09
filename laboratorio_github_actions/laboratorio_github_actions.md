@@ -764,8 +764,8 @@ jobs:
         run: |
           mkdir -p dist
           cp hello.py dist/
-          cp requirements.txt dist/
-          zip -r "dist/app-${{ needs.test.outputs.build_tag }}.zip" dist/
+          zip -r "app-${{ needs.test.outputs.build_tag }}.zip" dist/.
+          mv "app-${{ needs.test.outputs.build_tag }}.zip" dist/
       
       - name: Upload package
         uses: actions/upload-artifact@v4
