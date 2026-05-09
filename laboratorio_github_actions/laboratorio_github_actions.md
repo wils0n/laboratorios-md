@@ -480,8 +480,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to production
-        if: github.event_name == 'push'   # Solo en push, no en PR
         run: echo "Deploying..."
+        # if: github.event_name == 'push'   # Solo en push, no en PR
+        #run: echo "Deploying..."
 ```
 
 ### 3.4 Secrets y Variables de Entorno
