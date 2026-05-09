@@ -476,6 +476,7 @@ Ejecutar steps o jobs condicionalmente:
 ```yaml
 jobs:
   deploy:
+    needs: docs
     if: github.ref == 'refs/heads/main'  # Solo en rama main
     runs-on: ubuntu-latest
     steps:
