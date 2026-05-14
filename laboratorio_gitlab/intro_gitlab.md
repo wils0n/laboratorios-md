@@ -1,8 +1,8 @@
-# Laboratorio 10: GitLab CI/CD con Python
+Guía: GitLab CI/CD con Python
 
 **Duración estimada:** 90–120 min  
 **Nivel:** Intermedio  
-**Contexto:** En este laboratorio aprenderás a implementar CI/CD con GitLab CI/CD, desde conceptos básicos hasta pipelines con stages, jobs, artefactos y buenas prácticas.
+**Contexto:** En esta guía aprenderás a implementar CI/CD con GitLab CI/CD, desde conceptos básicos hasta pipelines con stages, jobs, artefactos y buenas prácticas.
 
 ---
 
@@ -37,7 +37,7 @@ gitlab_ci_demo/
 │   └── test_hello.py         # Tests unitarios
 ├── requirements.txt           # Dependencias Python
 ├── README.md                  # Documentación del proyecto
-└── laboratorio_gitlab_ci.md   # Esta guía
+└── intro_gitlab.md   # Esta guía
 ```
 
 ---
