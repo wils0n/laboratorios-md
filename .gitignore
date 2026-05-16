@@ -2,7 +2,8 @@
 # Labs no publicados aún
 laboratorio_IaC/
 laboratorio_azure_devops/
-laboratorio_azure_pipelines/
+laboratorio_azure_pipelines/*
+!laboratorio_azure_pipelines/guia_introduccion.md
 laboratorio_docker/Entregable_laboratorio6.1.md
 laboratorio_docker/lab-6.2-volumenes-docker-env.md
 laboratorio_docker/laboratorio_6_1_docker_flask.md
