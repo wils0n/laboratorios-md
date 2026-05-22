@@ -14,6 +14,7 @@ laboratorio_github_actions/*
 !laboratorio_github_actions/laboratorio_github_actions.md
 laboratorio_gitlab/*
 !laboratorio_gitlab/intro_gitlab.md
+!laboratorio_gitlab/laboratorio_gitlab.md
 laboratorio_mlops/
 laboratorios_calificados/
 laboratorios_devsecados/
