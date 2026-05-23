@@ -107,6 +107,32 @@ if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
 ```
 
+**Archivo: `test_hello.py`**
+
+```pythonfrom fastapi.testclient import TestClient
+from hello import app
+
+client = TestClient(app)
+
+
+def test_greet_default():
+    response = client.get("/hello")
+    assert response.status_code == 200
+    assert response.json() == {"message": "Hello, World!", "source": "FastAPI"}
+
+
+def test_greet_with_name():
+    response = client.get("/hello?name=UTEC")
+    assert response.status_code == 200
+    assert response.json() == {"message": "Hello, UTEC!", "source": "FastAPI"}
+
+
+def test_greet_unknown_param_ignored():
+    response = client.get("/hello?name=Alice&foo=bar")
+    assert response.status_code == 200
+    assert response.json()["message"] == "Hello, Alice!"
+```
+
 Correr localmente:
 ```bash
 pip install -r requirements-dev.txt
