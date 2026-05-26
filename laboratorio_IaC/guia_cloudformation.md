@@ -16,6 +16,16 @@ En este laboratorio aprenderás a provisionar una infraestructura completa en AW
 - Postman instalado
 - Archivo de imagen para pruebas
 
+## Estructura del Proyecto
+
+```
+cloudformation/
+├── rekognition-template.yml   # Template CloudFormation (infraestructura completa)
+├── auto.jpg                   # Imagen de prueba (automóvil)
+├── imagen_base64.txt          # Imagen auto.jpg ya codificada en Base64
+└── readme.md                  # Esta guía
+```
+
 ## Arquitectura de la Solución
 
 ```
@@ -77,7 +87,7 @@ Cliente (Postman) → API Gateway → Lambda → Rekognition
 #### Opción A: Usando línea de comandos (macOS/Linux)
 
 ```bash
-base64 -i car.jpeg -o imagen_base64.txt
+base64 -i auto.jpg -o imagen_base64.txt
 ```
 
 #### Opción B: Usando herramientas online
@@ -305,340 +315,217 @@ Prueba con una imagen que contenga texto para ver si detecta:
 
 ## Anexos
 
-### Template CloudFormation Explicado
+### Template CloudFormation: `rekognition-template.yml`
 
-El template `rekognition-template.yml` contiene:
+```yaml
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  API de Reconocimiento de Imágenes usando Lambda, Rekognition y API Gateway.
 
-1. **Rol IAM**: Define permisos necesarios
-2. **Función Lambda**: Contiene la lógica de procesamiento
-3. **API Gateway**: Expone la funcionalidad como API REST
-4. **Outputs**: Proporciona la URL del endpoint
+Resources:
 
-### Flujo de Datos
+  RekognitionLambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: RekognitionLambdaExecutionRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: RekognitionAccessPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - rekognition:DetectLabels
+                Resource: '*'
 
-1. **Cliente** envía imagen (Base64) vía POST
-2. **API Gateway** recibe y valida la petición
-3. **Lambda** decodifica la imagen y llama a Rekognition
-4. **Rekognition** analiza la imagen y retorna etiquetas
-5. **Lambda** procesa la respuesta y la retorna
-6. **API Gateway** envía la respuesta al cliente
+  RekognitionImageLabeler:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: RekognitionImageLabeler
+      Runtime: python3.12
+      Handler: index.lambda_handler
+      Role: !GetAtt RekognitionLambdaExecutionRole.Arn
+      Timeout: 10
+      MemorySize: 256
+      Code:
+        ZipFile: |
+          import json
+          import base64
+          import boto3
 
-¡Felicidades! Has completado el tutorial de provisión de infraestructura con CloudFormation y pruebas con Postman.
-# Tutorial: Provisionar API de Reconocimiento de Imágenes con AWS CloudFormation
+          def lambda_handler(event, context):
+              headers = event.get('headers') or {}
+              content_type = headers.get('Content-Type', headers.get('content-type', ''))
 
-## Objetivo
+              if 'application/json' not in content_type:
+                  return {
+                      'statusCode': 400,
+                      'headers': {'Content-Type': 'application/json'},
+                      'body': json.dumps({
+                          'error': 'Unsupported Content-Type. Only application/json is allowed.'
+                      })
+                  }
 
-En este laboratorio aprenderás a provisionar una infraestructura completa en AWS utilizando CloudFormation que incluye:
+              try:
+                  body = json.loads(event.get('body') or '{}')
+              except (json.JSONDecodeError, TypeError):
+                  return {
+                      'statusCode': 400,
+                      'headers': {'Content-Type': 'application/json'},
+                      'body': json.dumps({'error': 'Invalid JSON body.'})
+                  }
 
-- AWS Lambda (para procesamiento de imágenes)
-- Amazon Rekognition (para análisis de imágenes)
-- API Gateway (para exponer la funcionalidad como API REST)
-- Roles y políticas de IAM (para permisos)
+              if 'image' not in body:
+                  return {
+                      'statusCode': 400,
+                      'headers': {'Content-Type': 'application/json'},
+                      'body': json.dumps({'error': "Missing 'image' in JSON body."})
+                  }
 
-## Prerrequisitos
+              try:
+                  image_bytes = base64.b64decode(body['image'])
+              except Exception:
+                  return {
+                      'statusCode': 400,
+                      'headers': {'Content-Type': 'application/json'},
+                      'body': json.dumps({'error': 'Invalid base64 image data'})
+                  }
 
-- Cuenta de AWS activa
-- AWS CLI configurado (opcional pero recomendado)
-- Postman instalado
-- Archivo de imagen para pruebas
+              rekognition = boto3.client('rekognition')
+              response = rekognition.detect_labels(
+                  Image={'Bytes': image_bytes},
+                  MaxLabels=10,
+                  MinConfidence=75
+              )
 
-## Arquitectura de la Solución
+              labels = [label['Name'] for label in response['Labels']]
 
-```
-Cliente (Postman) → API Gateway → Lambda → Rekognition
-                                    ↓
-                               CloudWatch Logs
-```
+              return {
+                  'statusCode': 200,
+                  'headers': {'Content-Type': 'application/json'},
+                  'body': json.dumps({'labels': labels})
+              }
 
-## Parte 1: Provisionar la Infraestructura
+  RekognitionApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: RekognitionApi
+      Description: API para reconocimiento de imágenes con Amazon Rekognition
 
-### Paso 1: Acceder a CloudFormation
+  DetectResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref RekognitionApi
+      ParentId: !GetAtt RekognitionApi.RootResourceId
+      PathPart: detect
 
-1. Inicia sesión en la **Consola de AWS**
-2. Busca y selecciona **CloudFormation** en los servicios
-3. Haz clic en **"Create stack"** → **"With new resources (standard)"**
+  DetectPostMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref RekognitionApi
+      ResourceId: !Ref DetectResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub
+          - >-
+            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations
+          - LambdaArn: !GetAtt RekognitionImageLabeler.Arn
 
-### Paso 2: Cargar el Template
+  ApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn: DetectPostMethod
+    Properties:
+      RestApiId: !Ref RekognitionApi
+      StageName: prod
 
-1. Selecciona **"Upload a template file"**
-2. Haz clic en **"Choose file"** y selecciona `rekognition-template.yml`
-3. Haz clic en **"Next"**
+  LambdaApiGatewayPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt RekognitionImageLabeler.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub >-
+        arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${RekognitionApi}/*/POST/detect
 
-### Paso 3: Configurar el Stack
-
-1. **Stack name**: Ingresa un nombre descriptivo (ej: `rekognition-api-stack`)
-2. **Parameters**: Este template no requiere parámetros adicionales
-3. Haz clic en **"Next"**
-
-### Paso 4: Configurar Opciones del Stack
-
-1. **Tags** (opcional): Puedes agregar tags para organización
-   - Key: `Environment`, Value: `Lab`
-   - Key: `Project`, Value: `Rekognition-API`
-2. **Permissions**: Deja las opciones por defecto
-3. Haz clic en **"Next"**
-
-### Paso 5: Revisar y Crear
-
-1. Revisa toda la configuración
-2. ✅ Marca la casilla: **"I acknowledge that AWS CloudFormation might create IAM resources"**
-3. Haz clic en **"Create stack"**
-
-### Paso 6: Monitorear la Creación
-
-1. Observa la pestaña **"Events"** para ver el progreso
-2. El estado debe cambiar de `CREATE_IN_PROGRESS` a `CREATE_COMPLETE`
-3. Este proceso toma aproximadamente 2-3 minutos
-
-### Paso 7: Obtener la URL del API
-
-1. Ve a la pestaña **"Outputs"**
-2. Copia el valor de **"ApiEndpoint"**
-3. Debería verse así: `https://xxxxxxxxxx.execute-api.region.amazonaws.com/prod/detect`
-
-## Parte 2: Preparar Datos de Prueba
-
-### Codificar Imagen en Base64
-
-#### Opción A: Usando línea de comandos (macOS/Linux)
-
-```bash
-base64 -i car.jpeg -o imagen_base64.txt
-```
-
-#### Opción B: Usando herramientas online
-
-1. Ve a: https://www.base64encode.org/
-2. Carga tu imagen
-3. Copia el resultado
-
-#### Opción C: Usar la imagen proporcionada
-
-El archivo `imagen_base64.txt` ya contiene una imagen codificada lista para usar.
-
-#### Copiar al portapapeles (macOS)
-
-```bash
-pbcopy < imagen_base64.txt
-```
-
-Luego pega directamente con `Cmd+V` en el body de Postman.
-
-## Parte 3: Probar con Postman
-
-### Paso 1: Configurar la Petición
-
-1. Abre **Postman**
-2. Crea una nueva petición **POST**
-3. URL: Pega la URL obtenida del Output de CloudFormation
-4. Headers:
-   - `Content-Type`: `application/json`
-
-### Paso 2: Configurar el Body
-
-1. Selecciona **"Body"** → **"raw"** → **"JSON"**
-2. Ingresa el siguiente JSON:
-
-```json
-{
-  "image": "AQUÍ_VA_EL_BASE64_DE_TU_IMAGEN"
-}
-```
-
-**Ejemplo con imagen proporcionada:**
-
-```json
-{
-  "image": "/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxMTEhUTExMWFRUXFxcYFxgYGBgWGxcXFRUWFxcWGBcYHSggGB0lHRUXITEiJSkrLi4uFx8zODMtNygtLisBCgoKDg0OGhAQGy0mHyUrLS8tLisuLS0rLS4tLS0rKystLS0vLTUtLS0tLS0tLS0tLS0tLS0rLS0tLS0tLS0rLf/AABEIAI4BYgMBIgACEQEDEQH/xAAcAAABBQEBAQAAAAAAAAAAAAAFAgMEBgcBAAj..."
-}
-```
-
-### Paso 3: Enviar la Petición
-
-1. Haz clic en **"Send"**
-2. Deberías recibir una respuesta exitosa como:
-
-```json
-{
-  "labels": ["Car", "Vehicle", "Transportation", "Automobile", "Sedan"]
-}
+Outputs:
+  ApiEndpoint:
+    Description: URL del endpoint para detección de etiquetas
+    Value: !Sub >-
+      https://${RekognitionApi}.execute-api.${AWS::Region}.amazonaws.com/prod/detect
+    Export:
+      Name: RekognitionApiEndpoint
 ```
 
-## Parte 4: Análisis de Resultados
+### Explicación de cada bloque
 
-### Respuesta Exitosa (Status 200)
+#### Bloque 1: `RekognitionLambdaExecutionRole` (IAM Role)
 
-```json
-{
-  "labels": ["Car", "Vehicle", "Transportation", "Automobile", "Sedan"]
-}
-```
+Define los permisos que tendrá la función Lambda en tiempo de ejecución.
 
-### Posibles Errores y Soluciones
+- **`AssumeRolePolicyDocument`**: permite que el servicio `lambda.amazonaws.com` asuma este rol. Sin esto, Lambda no puede usarlo.
+- **`ManagedPolicyArns`**: adjunta la política `AWSLambdaBasicExecutionRole`, que otorga permiso para escribir logs en CloudWatch.
+- **`Policies`**: política personalizada que permite llamar a `rekognition:DetectLabels`. Es el único permiso de Rekognition necesario para este caso.
 
-#### Error 400 - Content-Type Incorrecto
+#### Bloque 2: `RekognitionImageLabeler` (Lambda Function)
 
-```json
-{
-  "error": "Unsupported Content-Type. Only application/json is allowed."
-}
-```
+Define la función Lambda con su código embebido directamente en el template.
 
-**Solución**: Verificar que el header `Content-Type` sea `application/json`
+- **`Runtime: python3.12`** y **`Handler: index.lambda_handler`**: ejecuta la función `lambda_handler` del archivo `index.py` (generado desde `ZipFile`).
+- **`Role: !GetAtt RekognitionLambdaExecutionRole.Arn`**: asocia el rol IAM del bloque anterior. `!GetAtt` es una función intrínseca de CloudFormation que obtiene un atributo de otro recurso.
+- **`Code.ZipFile`**: permite embeber código Python directamente en el YAML. El handler realiza estas validaciones en orden: Content-Type → JSON válido → campo `image` presente → Base64 decodificable → llamada a Rekognition.
+- **`MaxLabels: 10` y `MinConfidence: 75`**: Rekognition devuelve hasta 10 etiquetas con al menos 75% de confianza.
 
-#### Error 400 - Falta el Campo Image
+#### Bloque 3: `RekognitionApi` (API Gateway REST API)
 
-```json
-{
-  "error": "Missing 'image' in JSON body."
-}
-```
+Crea el contenedor principal del API REST. Solo define el nombre; los recursos y métodos se definen en bloques separados.
 
-**Solución**: Asegurar que el JSON tenga el campo `"image"`
+#### Bloque 4: `DetectResource` (API Gateway Resource)
 
-#### Error 400 - Base64 Inválido
+Crea la ruta `/detect` dentro del API.
 
-```json
-{
-  "error": "Invalid base64 image data"
-}
-```
+- **`ParentId: !GetAtt RekognitionApi.RootResourceId`**: adjunta el recurso a la raíz `/` del API.
+- **`PathPart: detect`**: define el segmento de URL, resultando en `/detect`.
 
-**Solución**: Verificar que el string Base64 esté correctamente codificado
+#### Bloque 5: `DetectPostMethod` (API Gateway Method)
 
-## Parte 5: Explorar la Infraestructura Creada
+Define que `/detect` acepta peticiones `POST`.
 
-### Recursos Creados por CloudFormation
+- **`AuthorizationType: NONE`**: no requiere autenticación (adecuado para laboratorio; en producción usaría API Key o Cognito).
+- **`Integration.Type: AWS_PROXY`**: modo Lambda Proxy — API Gateway pasa el evento completo (headers, body, querystring) directamente a Lambda sin transformaciones.
+- **`Uri`**: ARN de invocación de Lambda construido dinámicamente con `!Sub` y `${AWS::Region}`.
 
-1. **IAM Role**: `RekognitionLambdaExecutionRole`
+#### Bloque 6: `ApiDeployment` (API Gateway Deployment)
 
-   - Permisos para Lambda, Rekognition y CloudWatch
+Publica el API en el stage `prod`, generando la URL final.
 
-2. **Lambda Function**: `RekognitionImageLabeler`
+- **`DependsOn: DetectPostMethod`**: CloudFormation crea este recurso solo después de que el método POST exista. Sin esto, podría intentar desplegar un API vacío.
 
-   - Runtime: Python 3.12
-   - Timeout: 10 segundos
-   - Memoria: 256 MB
+#### Bloque 7: `LambdaApiGatewayPermission` (Lambda Permission)
 
-3. **API Gateway**: `RekognitionApi`
+Otorga a API Gateway permiso explícito para invocar la función Lambda.
 
-   - Endpoint: `/detect` (POST)
-   - Integración con Lambda
+- Aunque el rol IAM define lo que Lambda *puede hacer*, este permiso define *quién puede invocar a Lambda*. Sin él, API Gateway recibiría un error `403` al intentar llamar a la función.
+- **`SourceArn`**: restringe el permiso solo a peticiones `POST /detect` de este API específico.
 
-4. **CloudWatch Logs**: Automáticamente creados para Lambda
+#### Bloque 8: `Outputs`
 
-### Verificar los Recursos
+Expone la URL del endpoint como output del stack.
 
-#### Ver la Función Lambda
-
-1. Ve a **AWS Lambda** en la consola
-2. Busca `RekognitionImageLabeler`
-3. Revisa el código y configuración
-
-#### Ver el API Gateway
-
-1. Ve a **API Gateway** en la consola
-2. Busca `RekognitionApi`
-3. Explora los recursos y métodos
-
-#### Ver los Logs
-
-1. Ve a **CloudWatch** → **Log groups**
-2. Busca `/aws/lambda/RekognitionImageLabeler`
-3. Revisa los logs de ejecución
-
-## Parte 6: Pruebas Adicionales
-
-### Test 1: Imagen de Persona
-
-Prueba con una imagen que contenga personas para ver etiquetas como:
-
-- `Person`, `Human`, `Face`, `Smile`, etc.
-
-### Test 2: Imagen de Paisaje
-
-Prueba con una imagen de paisaje para ver etiquetas como:
-
-- `Nature`, `Landscape`, `Tree`, `Sky`, etc.
-
-### Test 3: Imagen con Texto
-
-Prueba con una imagen que contenga texto para ver si detecta:
-
-- `Text`, `Document`, `Page`, etc.
-
-## Parte 7: Monitoreo y Troubleshooting
-
-### Ver Métricas en CloudWatch
-
-1. Ve a **CloudWatch** → **Metrics**
-2. Explora **AWS/Lambda** y **AWS/ApiGateway**
-3. Observa métricas como:
-   - Invocations
-   - Duration
-   - Errors
-   - 4XXError, 5XXError
-
-### Debugging Común
-
-#### Si la API no responde:
-
-1. Verificar que el stack se creó correctamente
-2. Revisar logs de Lambda en CloudWatch
-3. Verificar permisos de IAM
-
-#### Si obtienes errores de Rekognition:
-
-1. Verificar que tienes permisos para usar Rekognition
-2. Confirmar que estás en una región que soporta Rekognition
-3. Revisar el formato de la imagen (debe ser JPG o PNG)
-
-## Parte 8: Cleanup (Limpiar Recursos)
-
-### Eliminar el Stack
-
-1. Ve a **CloudFormation**
-2. Selecciona tu stack
-3. Haz clic en **"Delete"**
-4. Confirma la eliminación
-
-**⚠️ Importante**: Esto eliminará todos los recursos creados y evitará cargos adicionales.
-
-## Conceptos Clave Aprendidos
-
-1. **Infrastructure as Code (IaC)**: Definir infraestructura mediante código
-2. **AWS CloudFormation**: Servicio para provisionar recursos de AWS
-3. **Serverless Architecture**: Usar Lambda sin gestionar servidores
-4. **API Gateway**: Crear y gestionar APIs REST
-5. **Amazon Rekognition**: Análisis de imágenes mediante ML
-6. **IAM Roles**: Gestión de permisos y seguridad
-
-## Preguntas de Reflexión
-
-1. ¿Qué ventajas tiene usar CloudFormation vs crear recursos manualmente?
-2. ¿Cómo modificarías el template para agregar más funcionalidades?
-3. ¿Qué consideraciones de seguridad adicionales implementarías?
-4. ¿Cómo escalarías esta solución para manejar más tráfico?
-
-## Recursos Adicionales
-
-- [Documentación de CloudFormation](https://docs.aws.amazon.com/cloudformation/)
-- [Documentación de Rekognition](https://docs.aws.amazon.com/rekognition/)
-- [Documentación de Lambda](https://docs.aws.amazon.com/lambda/)
-- [Documentación de API Gateway](https://docs.aws.amazon.com/apigateway/)
-
----
-
-## Anexos
-
-### Template CloudFormation Explicado
-
-El template `rekognition-template.yml` contiene:
-
-1. **Rol IAM**: Define permisos necesarios
-2. **Función Lambda**: Contiene la lógica de procesamiento
-3. **API Gateway**: Expone la funcionalidad como API REST
-4. **Outputs**: Proporciona la URL del endpoint
+- Visible en la pestaña **Outputs** de CloudFormation tras la creación.
+- **`!Sub`**: sustituye `${RekognitionApi}` y `${AWS::Region}` con los valores reales en tiempo de despliegue.
+- **`Export`**: permite que otros stacks de CloudFormation referencien este valor con `!ImportValue RekognitionApiEndpoint`.
 
 ### Flujo de Datos
 
