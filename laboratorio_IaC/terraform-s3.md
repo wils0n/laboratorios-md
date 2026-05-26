@@ -185,6 +185,41 @@ output "website_url" {
 
 ---
 
+## 📋 4.6 Configurar Variables
+
+Las variables permiten parametrizar la configuración sin modificar `main.tf`.
+
+### Declarar variables — `variables.tf`
+
+```hcl
+variable "aws_region" {
+  description = "Región de AWS donde se desplegarán los recursos"
+  type        = string
+  default     = "us-east-1"
+}
+```
+
+> ⚠️ Si usas `var.<nombre>` en `main.tf` y no declaras la variable en `variables.tf`, `terraform validate` fallará con `Reference to undeclared input variable`.
+
+### Asignar valores — 4 formas
+
+| Método | Ejemplo | Cuándo usar |
+|--------|---------|-------------|
+| **Default en `variables.tf`** | `default = "us-east-1"` | Valor estándar del proyecto |
+| **`terraform.tfvars`** | `aws_region = "us-west-2"` | Overrides locales (no versionar si tiene secretos) |
+| **Flag `-var`** | `terraform apply -var="aws_region=us-west-2"` | One-off, CI/CD |
+| **Variable de entorno** | `export TF_VAR_aws_region=us-west-2` | Automatización, secrets |
+
+### Archivo `terraform.tfvars` (opcional)
+
+```hcl
+aws_region = "us-east-1"
+```
+
+Terraform lo carga automáticamente si el archivo se llama `terraform.tfvars` o `*.auto.tfvars`.
+
+---
+
 ## 🚀 5. Ejecución del proyecto
 
 ### 5.1 Inicializar Terraform
