@@ -68,7 +68,6 @@ EC2 Instance (Amazon Linux 2023 + nginx)
 ec2/
 ├── main.tf
 ├── variables.tf
-├── terraform.tfvars
 └── user_data.sh
 ```
 
@@ -169,6 +168,85 @@ resource "aws_instance" "web" {
 }
 ```
 
+### main.tf completo
+```bash
+terraform {
+  required_version = ">= 1.0"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = var.aws_region
+}
+
+data "aws_ami" "amazon_linux" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["al2023-ami-*-x86_64"]
+  }
+}
+
+resource "aws_security_group" "web_sg" {
+  name        = "web-server-sg"
+  description = "Permite HTTP y SSH"
+
+  ingress {
+    description = "HTTP"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "SSH"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "web-server-sg"
+  }
+}
+
+resource "aws_instance" "web" {
+  ami                         = data.aws_ami.amazon_linux.id
+  instance_type               = var.instance_type
+  vpc_security_group_ids      = [aws_security_group.web_sg.id]
+  associate_public_ip_address = true
+  user_data                   = file("${path.module}/user_data.sh")
+
+  tags = {
+    Name = "web-server"
+  }
+}
+
+output "public_ip" {
+  value = aws_instance.web.public_ip
+}
+
+output "website_url" {
+  value = "http://${aws_instance.web.public_dns}"
+}
+```
+
 ---
 
 ### 4.5 Script de arranque (user_data.sh)
@@ -183,10 +261,48 @@ systemctl enable nginx
 cat > /usr/share/nginx/html/index.html <<'EOF'
 <!DOCTYPE html>
 <html lang="es">
-<head><meta charset="UTF-8"><title>Servidor EC2</title></head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Servidor EC2 - Terraform</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      background-color: #1a1a2e;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 40px 60px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+    h1 { color: #232f3e; }
+    p  { color: #555; }
+    .badge {
+      display: inline-block;
+      background: #232f3e;
+      color: #ff9900;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      margin-top: 16px;
+    }
+  </style>
+</head>
 <body>
-  <h1>Servidor desplegado con Terraform</h1>
-  <p>Amazon EC2 + nginx — DevOps UTEC</p>
+  <div class="card">
+    <h1>🖥️ Servidor EC2 con Terraform</h1>
+    <p>Esta instancia fue creada y configurada usando <strong>Terraform</strong>.</p>
+    <p>nginx instalado automáticamente via <strong>user_data</strong></p>
+    <p>Infraestructura como Código — DevOps UTEC</p>
+    <span class="badge">AWS EC2 + nginx + Terraform</span>
+  </div>
 </body>
 </html>
 EOF
@@ -252,22 +368,16 @@ terraform destroy
 ### variables.tf
 ```hcl
 variable "aws_region" {
-  description = "Región de AWS"
+  description = "AWS region where resources will be deployed"
   type        = string
   default     = "us-east-1"
 }
 
 variable "instance_type" {
-  description = "Tipo de instancia EC2"
+  description = "EC2 instance type"
   type        = string
   default     = "t2.micro"
 }
-```
-
-### terraform.tfvars
-```hcl
-aws_region    = "us-east-1"
-instance_type = "t2.micro"
 ```
 
 ---
