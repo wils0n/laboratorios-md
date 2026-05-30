@@ -4,6 +4,7 @@ laboratorio_IaC/*
 !laboratorio_IaC/guia_cloudformation.md
 !laboratorio_IaC/terraform-ec2.md
 !laboratorio_IaC/terraform-s3.md
+!laboratorio_IaC/laboratorio_terraform_gitlab.md
 laboratorio_azure_devops/
 laboratorio_azure_pipelines/*
 !laboratorio_azure_pipelines/guia_introduccion.md
