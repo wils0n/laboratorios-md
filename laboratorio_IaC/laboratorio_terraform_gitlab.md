@@ -35,7 +35,6 @@ gitlab_terraform_demo/
 ├── .gitlab-ci.yml      # Pipeline de CI/CD
 ├── main.tf             # IAM role + Lambda + Function URL
 ├── variables.tf        # Variables de entrada
-├── terraform.tfvars    # Valores de las variables
 └── app/
     └── handler.py      # Handler Lambda — ejecutable localmente
 ```
@@ -613,27 +612,6 @@ lambda.zip
 - [ ] Al modificar `handler.py` y hacer push, el pipeline actualiza la función
 - [ ] Credenciales AWS no aparecen en logs del pipeline
 - [ ] Recursos destruidos al finalizar (`terraform destroy`)
-
----
-
-## Entregables
-
-1. **Repositorio GitLab** con:
-   - `.gitlab-ci.yml` con los 3 stages
-   - `main.tf`, `variables.tf`, `terraform.tfvars`
-   - `app/handler.py`
-2. **Capturas de pantalla:**
-   - Handler corriendo localmente: `python app/handler.py`
-   - Pipeline con los 3 jobs del stage `validate` en paralelo
-   - Logs del job `plan` mostrando los recursos a crear (IAM role + Lambda + Function URL)
-   - Job `apply` en estado "manual"
-   - `curl <function_url>?name=UTEC` con la respuesta JSON
-   - Estado Terraform en **Infrastructure → Terraform States**
-3. **Reflexión (comparativo con el lab de Serverless Framework):**
-   - ¿Qué recursos creó Terraform explícitamente que Serverless Framework creaba automáticamente?
-   - ¿Qué ventaja tiene declarar el IAM role en HCL vs dejarlo a Serverless?
-   - ¿Cuándo preferirías Terraform sobre Serverless Framework en un proyecto real?
-   - ¿Qué diferencias notaste en la velocidad de despliegue entre ambos tools?
 
 ---
 
