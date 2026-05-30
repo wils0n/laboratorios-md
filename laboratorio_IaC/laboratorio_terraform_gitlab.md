@@ -421,6 +421,17 @@ apply:
   when: manual
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
+
+destroy:
+  stage: apply
+  <<: *terraform_cache
+  <<: *terraform_init
+  script:
+    - terraform destroy -auto-approve
+  when: manual
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
 ```
 
 ---
