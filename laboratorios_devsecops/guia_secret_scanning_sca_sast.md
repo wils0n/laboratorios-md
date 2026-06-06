@@ -46,7 +46,7 @@ juice-shop-devsecops/
 ```bash
 git clone https://github.com/wils0n/juice-shop-devsecops
 cd juice-shop-devsecops
-mkdir -p reports sbom
+mkdir -p reports
 ```
 
 ### 1.2 Apuntar remote a GitLab
@@ -106,11 +106,6 @@ docker run --rm -v $(pwd):/src aquasec/trivy:latest fs /src \
 > | Momento | Uso |
 > |---|---|
 > | **CI/CD — stage SCA** | El pipeline genera el SBOM como artefacto del build. Si hay un CVE crítico en alguna dependencia, el pipeline falla antes de llegar a producción. |
-> | **Release / deploy** | El `sbom.json` se adjunta al release tag o se almacena junto a la imagen Docker en el registry. Queda trazabilidad de qué versión de qué librería estaba en cada deploy. |
-> | **Nuevo CVE publicado (reactivo)** | Sale Log4Shell o similar → buscas el componente en el SBOM → sabes en segundos qué servicios son vulnerables sin re-escanear todo. |
-> | **Incident response** | Durante un ataque, el equipo de seguridad consulta el SBOM para mapear la superficie de exposición y priorizar el parcheo. |
-> | **Auditoría de licencias** | Legal revisa el SBOM antes de distribuir el software comercialmente para detectar licencias incompatibles (GPL, AGPL). |
-> | **Cumplimiento normativo** | Requerido por NIST SSDF, EO 14028 (EE.UU.) y regulaciones de la UE. Se entrega el SBOM al auditor como evidencia. |
 
 ---
 
@@ -134,6 +129,41 @@ docker run --rm -it -v $(pwd):/src trufflesecurity/trufflehog:latest filesystem 
 
 > Ambas herramientas buscarán API keys, tokens, passwords o certificados mal protegidos dentro del código o el historial Git.
 
+---
+
+## Parte 3.5: Análisis SAST con Semgrep
+
+### 3.3 Ejecutar Semgrep desde Docker
+
+```bash
+docker run --rm -v $(pwd):/src semgrep/semgrep semgrep \
+  --config "p/ci" \
+  --config "p/security-audit" \
+  --config "p/javascript" \
+  --json --output /src/reports/semgrep-report.json \
+  /src
+```
+
+### 3.4 Reporte en formato texto (consola)
+
+```bash
+docker run --rm -v $(pwd):/src semgrep/semgrep semgrep \
+  --config "p/ci" \
+  --config "p/security-audit" \
+  /src
+```
+
+### 3.5 Escaneo con regla específica
+
+```bash
+docker run --rm -v $(pwd):/src semgrep/semgrep semgrep \
+  --config "p/javascript" \
+  --severity ERROR \
+  --json --output /src/reports/semgrep-js-report.json \
+  /src
+```
+
+> **¿Qué analiza Semgrep?** Busca patrones inseguros en código fuente: inyecciones SQL, XSS, uso de funciones peligrosas, credenciales hardcodeadas y malas prácticas específicas por lenguaje. A diferencia de las herramientas de dependencias (SCA), Semgrep analiza el **código que tú escribes** (SAST).
 
 ---
 
@@ -229,19 +259,18 @@ trivy-scan:
 
 # SAST con Semgrep
 semgrep-scan:
-  image: returntocorp/semgrep:latest
+  image: semgrep/semgrep:latest
   stage: sast
   needs:
     - gitleaks-scan
     - trufflehog-scan
   variables:
-    SEMGREP_CONFIG: "p/ci,p/security-audit,p/docker,p/kubernetes,p/terraform"
     SEMGREP_SRC: "$CI_PROJECT_DIR"
   script:
     - echo "🔍 Ejecutando Semgrep (SAST)..."
     - semgrep --version
-    - semgrep --config "$SEMGREP_CONFIG" --json --output semgrep-report.json "$SEMGREP_SRC" || true
-    - semgrep --config "$SEMGREP_CONFIG" "$SEMGREP_SRC" > semgrep-report.txt || true
+    - semgrep --config "p/ci" --config "p/security-audit" --config "p/javascript" --json --output semgrep-report.json "$SEMGREP_SRC" || true
+    - semgrep --config "p/ci" --config "p/security-audit" --config "p/javascript" "$SEMGREP_SRC" > semgrep-report.txt || true
   artifacts:
     paths:
       - semgrep-report.json
