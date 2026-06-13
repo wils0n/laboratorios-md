@@ -398,10 +398,18 @@ upload-defectdojo:
 > - Los paths de artifacts: Gitleaks y TruffleHog en raíz, Trivy en `security-reports/`, Semgrep en raíz.
 
 ---
-### 4.4 Hacer que falle cada job si hay hallazgos:
-Cambiar  
+### 4.4 Hacer que cada job se marque en rojo (error) si hay hallazgos, sin frenar el pipeline
+
+Objetivo: si un scanner encuentra hallazgos, su job debe verse **rojo (failed)**, no naranja (warning) — pero el reporte debe generarse igual y `upload-defectdojo` debe seguir corriendo.
+
+Para lograrlo en cada job de escaneo:
+1. **Quitar `|| true`** del comando que determina el resultado del scan, para que el exit code real (1 = hallazgos) se propague al job.
+2. **Quitar `allow_failure: true`** — así el job falla "de verdad" (rojo) en vez de quedar como warning.
+3. **Agregar `artifacts.when: always`** — el reporte se sube como artifact aunque el job falle.
+4. El job ya tiene `rules: - when: always`, así que se ejecuta igual aunque la rama/pipeline tenga jobs en rojo, y `upload-defectdojo` (también con `rules: - when: always`) corre y sube el reporte a DefectDojo sin problema.
 
 **Gitleaks:**
+Cambiar
 ```
     - ./gitleaks detect --source . --report-path gitleaks-report.json || true
 ```
@@ -409,61 +417,34 @@ por
 ```
     - ./gitleaks detect --source . --report-path gitleaks-report.json
 ```
-```
-    allow_failure: true
-```
-por
-```
-    allow_failure: false
-```
+y en `artifacts`, agregar `when: always`; quitar `allow_failure: true`.
 
-**trufflehog:**
+**TruffleHog:**
+Cambiar
 ```
-- ./trufflehog filesystem . --results=verified,unknown --json > trufflehog-report.json || true
-```
-por
-```
-- ./trufflehog filesystem . --results=verified,unknown --fail --json > trufflehog-report.json
-```
-```
-  allow_failure: true
+    - ./trufflehog filesystem . --results=verified,unknown --json > trufflehog-report.json || true
 ```
 por
 ```
-  allow_failure: false
+    - ./trufflehog filesystem . --results=verified,unknown --json --fail > trufflehog-report.json
 ```
+(`--fail` hace que TruffleHog devuelva exit code distinto de 0 si encontró secretos). En `artifacts`, agregar `when: always`; quitar `allow_failure: true`.
 
 **Trivy:**
-```
-    - trivy filesystem . --scanners vuln --severity HIGH,CRITICAL --exit-code 1 --format table || true
-```
-por
+La última línea ya usa `--exit-code 1` sin `|| true`:
 ```
     - trivy filesystem . --scanners vuln --severity HIGH,CRITICAL --exit-code 1 --format table
 ```
-```
-  allow_failure: true
-```
-por
-```
-  allow_failure: false
-```
+Dejarla así (no agregar `|| true`). En `artifacts`, agregar `when: always`; quitar `allow_failure: true`.
 
 **Semgrep:**
+Las dos primeras líneas (que generan los reportes) se dejan con `|| true` para que el reporte siempre se genere. Se agrega una tercera línea solo para fallar el job si hay hallazgos:
 ```
+    - semgrep --config "p/ci" --config "p/security-audit" --config "p/javascript" --json --output semgrep-report.json "$SEMGREP_SRC" || true
     - semgrep --config "p/ci" --config "p/security-audit" --config "p/javascript" "$SEMGREP_SRC" > semgrep-report.txt || true
+    - semgrep --config "p/ci" --config "p/security-audit" --config "p/javascript" --error "$SEMGREP_SRC" > /dev/null
 ```
-por
-```
-    - semgrep --config "p/ci" --config "p/security-audit" --config "p/javascript" --error "$SEMGREP_SRC" > semgrep-report.txt
-```
-```
-  allow_failure: true
-```
-por
-```
-  allow_failure: true
-```
+(`--error` hace que Semgrep devuelva exit code 1 si hay findings). En `artifacts`, agregar `when: always`; quitar `allow_failure: true`.
 
 ---
 
