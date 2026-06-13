@@ -320,6 +320,94 @@ bash scripts/upload_to_defectdojo.sh "Gitleaks Scan"       reports/gitleaks-repo
 bash scripts/upload_to_defectdojo.sh "Trufflehog Scan"     reports/trufflehog-report.json
 ```
 
+```
+#!/bin/bash
+# Sube un reporte a DefectDojo via API REST.
+# Uso: ./upload_to_defectdojo.sh <scan_type> <report_file>
+#
+# Variables de entorno requeridas:
+#   DEFECTDOJO_URL            URL base (ej: http://localhost:8080)
+#   DEFECTDOJO_TOKEN          API token
+#   DEFECTDOJO_ENGAGEMENT_ID  ID del engagement destino
+
+set -e
+
+SCAN_TYPE="$1"
+REPORT_FILE="$2"
+
+if [[ -z "$SCAN_TYPE" || -z "$REPORT_FILE" ]]; then
+  echo "Uso: $0 <scan_type> <report_file>"
+  exit 1
+fi
+
+if [[ ! -f "$REPORT_FILE" ]]; then
+  echo "Archivo no encontrado: $REPORT_FILE — omitiendo"
+  exit 0
+fi
+
+if [[ ! -s "$REPORT_FILE" ]]; then
+  echo "Archivo vacío: $REPORT_FILE — omitiendo"
+  exit 0
+fi
+
+for var in DEFECTDOJO_URL DEFECTDOJO_TOKEN DEFECTDOJO_ENGAGEMENT_ID; do
+  if [[ -z "${!var}" ]]; then
+    echo "Variable requerida no definida: $var"
+    exit 1
+  fi
+done
+
+UPLOAD_FILE="$REPORT_FILE"
+
+# TruffleHog genera NDJSON con secuencias de escape al inicio.
+# DefectDojo espera líneas JSON limpias; se normaliza antes de subir.
+if [[ "$SCAN_TYPE" == "Trufflehog Scan" ]]; then
+  CLEAN_FILE="/tmp/trufflehog-clean-$$.json"
+  # Filtrar solo líneas con hallazgos reales (tienen SourceMetadata)
+  grep '"SourceMetadata"' "$REPORT_FILE" | \
+    sed 's/\r//' | \
+    grep -v '^[^{]' > "$CLEAN_FILE" || true
+
+  if [[ ! -s "$CLEAN_FILE" ]]; then
+    echo "TruffleHog: sin hallazgos válidos tras limpieza — omitiendo"
+    rm -f "$CLEAN_FILE"
+    exit 0
+  fi
+  UPLOAD_FILE="$CLEAN_FILE"
+fi
+
+echo "Subiendo '$REPORT_FILE' como '$SCAN_TYPE' al engagement $DEFECTDOJO_ENGAGEMENT_ID..."
+
+RESPONSE=$(curl -s -w "\n%{http_code}" \
+  -X POST "$DEFECTDOJO_URL/api/v2/import-scan/" \
+  -H "Authorization: Token $DEFECTDOJO_TOKEN" \
+  -F "scan_type=$SCAN_TYPE" \
+  -F "file=@$UPLOAD_FILE" \
+  -F "engagement=$DEFECTDOJO_ENGAGEMENT_ID" \
+  -F "active=true" \
+  -F "verified=false" \
+  -F "close_old_findings=true")
+
+HTTP_STATUS=$(echo "$RESPONSE" | tail -1)
+BODY=$(echo "$RESPONSE" | head -n -1)
+
+if [[ -n "$CLEAN_FILE" ]]; then
+  rm -f "$CLEAN_FILE"
+fi
+
+if [[ "$HTTP_STATUS" == "201" ]]; then
+  FINDING_COUNT=$(echo "$BODY" | grep -o '"test":[0-9]*' | head -1 || echo "")
+  echo "OK importado (HTTP 201) — $SCAN_TYPE"
+else
+  echo "Error al importar $SCAN_TYPE (HTTP $HTTP_STATUS)"
+  echo "Respuesta: $BODY"
+  exit 1
+fi
+
+```
+
+
+
 ### 5.3 Stage defectdojo en el pipeline existente
 
 El `.gitlab-ci.yml` ya tiene el stage `defectdojo` añadido al final. El job `upload-defectdojo`:
